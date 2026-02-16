@@ -1,0 +1,2 @@
+欠陥ID,タイトル,状態,重要度,優先度,発見日,発見者,検出環境,検出ビルド,関連テストケースNo,証跡,詳細リンク,備考
+DEFECT-001,依頼者が他人チケット詳細を参照できる,検証済,Critical,High,2026-01-13,仁後慎太郎,Win11/Chrome,app-defect-idor,TC-002;TC-003,TR-0001.png; TR-0002.png,defects/reports/DEFECT-001.md,意図的欠陥（IDOR=ON）再現

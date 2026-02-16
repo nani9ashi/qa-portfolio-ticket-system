@@ -1,0 +1,43 @@
+要件ID,カテゴリ,対象（画面/機能）,ロール,要件（概要）,受入条件（簡潔）,優先度,備考
+RQ-001,機能,認証/共通,全ロール,ログイン必須,未ログイン状態では一覧/詳細/作成/更新/コメント等の全機能にアクセスできない（ログイン画面へ誘導または403）,Must,Django標準認証を前提
+RQ-002,機能,監査ログ/共通,全ロール,全操作は監査ログに残る,チケット作成/更新/ステータス変更/担当割当/期限変更/コメント追加が監査ログに記録され、誰がいつ何をしたか追跡できる,Must,「操作」単位で残ること
+RQ-003,機能,チケット項目/共通,全ロール,チケットのtitleは必須かつ最大80文字,title未入力は保存不可、81文字以上は保存不可（エラー表示）,Must,上限値はMVP固定
+RQ-004,機能,チケット項目/共通,全ロール,チケットのbodyは必須かつ最大4000文字,body未入力は保存不可、4001文字以上は保存不可（エラー表示）,Must,上限値はMVP固定
+RQ-005,機能,チケット項目/共通,全ロール,statusは必須で初期値Open,新規作成時statusはOpenで保存される。statusは定義済み5種のみが保持される,Must,"Open,In Progress,Pending,Resolved,Closed"
+RQ-006,機能,チケット項目/共通,Admin,due_dateは任意で過去日不可,Adminが期限を未設定で保存できる。過去日を設定しようとすると保存不可（エラー表示）,Must,日付のみ
+RQ-007,機能,チケット項目/共通,Admin,assigneeは任意でAdminのみ設定/変更できる,Adminのみ担当者を設定/変更できる。Requester/Agentは担当者を変更できない,Must,担当者はAgentロールのみ選択可
+RQ-008,制約,添付/共通,Requester,添付は任意で1ファイルのみ,添付なしで作成できる。添付ありは1ファイルまで。2つ以上は不可（UI/サーバで制御）,Must,
+RQ-009,制約,添付/共通,Requester,添付は拡張子制限がある,.png/.jpg/.pdf/.txt 以外はアップロード不可（エラー表示）,Must,拡張子はMVP固定
+RQ-010,制約,添付/共通,Requester,添付はサイズ上限5MB,5MB超はアップロード不可（エラー表示）,Must,サイズはMVP固定
+RQ-011,制約,添付/共通,Requester,添付は作成時のみ付与でき、差し替え/削除は不可,作成後に添付の削除・差し替えのUIが存在しない、または操作しても拒否される,Must,実装簡略化・テストしやすさ優先
+RQ-012,機能,チケット作成,Requester,Requesterは自分名義でチケット作成できる,Requesterがtitle/body（必須）を入力して作成すると自分のチケットとして保存される,Must,
+RQ-013,認可,チケット作成,Agent,Agentはチケットを作成できない,Agent向けに作成UIがない、または直接アクセスしても拒否される,Must,
+RQ-014,認可,チケット作成,Admin,Adminはチケットを作成できる（更新権限に含む）,Adminがチケットを作成できる（作成UIがある or 管理画面から作成できる）,Should,運用上はAdmin作成はあってもよい
+RQ-015,認可,チケット閲覧（一覧/詳細）,Requester,Requesterは自分のチケットのみ閲覧できる,一覧/詳細で他人のチケットが表示されない。直接URL指定でも拒否される,Must,最重要の認可ポイント
+RQ-016,認可,チケット閲覧（一覧/詳細）,Agent,Agentは全チケットを閲覧できる,一覧/詳細で全チケットにアクセスできる,Must,
+RQ-017,認可,チケット閲覧（一覧/詳細）,Admin,Adminは全チケットを閲覧できる,一覧/詳細で全チケットにアクセスできる,Must,
+RQ-018,機能,チケット一覧,全ロール,検索（q）でtitle/body部分一致ができる,q指定でtitleまたはbodyに部分一致するチケットが絞り込まれる,Must,大小文字の扱いは任意
+RQ-019,機能,チケット一覧,全ロール,状態フィルタでstatus絞り込みができる,status指定で該当ステータスのチケットが絞り込まれる,Must,
+RQ-020,機能,チケット詳細,全ロール,詳細画面に主要項目を表示する,title/body/status/due_date/assignee/attachment が表示される（権限上閲覧できる範囲で）,Must,
+RQ-021,機能,コメント,Requester,Requesterは自分のチケットにコメント追加できる,自分のチケット詳細でコメント追加ができ、保存後に一覧へ反映される,Must,
+RQ-022,認可,コメント,Requester,Requesterは他人のチケットにコメントできない,他人チケットへコメント追加はUI上不可または拒否される,Must,
+RQ-023,機能,コメント,Agent,Agentは任意のチケットにコメント追加できる,チケット詳細でコメント追加ができる,Must,
+RQ-024,機能,コメント,Admin,Adminは任意のチケットにコメント追加できる,チケット詳細でコメント追加ができる,Must,
+RQ-025,機能,監査ログ/コメント,全ロール,コメント追加は監査ログにCOMMENT_ADDEDとして残る,コメント追加操作が監査ログに記録され、種別がCOMMENT_ADDEDである,Must,
+RQ-026,認可,更新（フィールド単位）,Requester,Requesterはステータス変更できない,自分のチケットでもステータス変更UIがない、または拒否される,Must,
+RQ-027,認可,更新（フィールド単位）,Requester,Requesterは担当者割当できない,担当者の変更UIがない、または拒否される,Must,
+RQ-028,認可,更新（フィールド単位）,Requester,Requesterは期限変更できない,due_dateの変更UIがない、または拒否される,Must,
+RQ-029,認可,更新（フィールド単位）,Agent,Agentは担当チケットのみ更新できる,自分が担当のチケットでは更新できるが、非担当チケットの更新は拒否される,Must,更新＝ステータス変更＋コメント追加
+RQ-030,認可,更新（フィールド単位）,Agent,Agentは担当者割当できない,担当者の変更UIがない、または拒否される,Must,
+RQ-031,認可,更新（フィールド単位）,Agent,Agentは期限変更できない（任意固定）,due_dateの変更UIがない、または拒否される,Should,「任意」だがMVPでは固定推奨
+RQ-032,認可,更新（フィールド単位）,Admin,Adminは全チケットを更新できる,Adminはstatus/assignee/due_date 等を更新できる,Must,
+RQ-033,機能,担当割当,Admin,Adminは未割当チケットをAgentへ割り当てできる,未割当→Agentへの割当ができ、反映される,Must,再割当可否は後で決めても良い
+RQ-034,制約,ステータス変更,Agent,担当未割当のチケットはAgentがステータス変更できない,assigneeが未設定のチケットでAgentがステータス変更しようとすると拒否される,Must,BtoBっぽい運用固定
+RQ-035,制約,ステータス遷移,Agent/Admin,許可された遷移のみ可能,許可以外の遷移は拒否される（UI/サーバ側で制御）,Must,遷移表はRQ-036〜040
+RQ-036,制約,ステータス遷移,Agent/Admin,Open→In Progress / Pending が可能,OpenからIn ProgressまたはPendingへの変更が成功する,Must,
+RQ-037,制約,ステータス遷移,Agent/Admin,In Progress→Resolved / Pending が可能,In ProgressからResolvedまたはPendingへの変更が成功する,Must,
+RQ-038,制約,ステータス遷移,Agent/Admin,Pending→In Progress が可能,PendingからIn Progressへの変更が成功する,Must,
+RQ-039,制約,ステータス遷移,Agent/Admin,Resolved→Closed が可能,ResolvedからClosedへの変更が成功する,Must,
+RQ-040,制約,ステータス遷移,Agent/Admin,Open→Closed は禁止,OpenからClosedへの変更は拒否される,Must,
+RQ-041,制約,ステータス遷移,Agent/Admin,Closedからの遷移はすべて禁止,Closedから他ステータスへ変更できない,Must,
+RQ-042,機能,監査ログ表示,全ロール,チケット詳細で監査ログ（履歴）一覧を閲覧できる,チケット詳細で監査ログ一覧が表示される（閲覧権限に従う）,Should,一覧の項目は実装で固定
