@@ -1,0 +1,61 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  e2e-test:
+    name: E2E Test (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # 1. コードのチェックアウト
+      - uses: actions/checkout@v4
+
+      # 2. Pythonのセットアップ
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      # 3. ライブラリのインストール
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python -m playwright install chromium
+
+      # 4. データベースの準備（マイグレーション & データ投入）
+      - name: Prepare Database
+        run: |
+          cd app
+          python manage.py migrate
+          python manage.py seed_demo
+
+      # 5. サーバー起動 & テスト実行
+      # バックグラウンド(&)でサーバーを立ち上げ、起動待機してからテスト
+      - name: Run Server and Test
+        run: |
+          # アプリ起動（バックグラウンド）
+          cd app
+          python manage.py runserver 127.0.0.1:8000 &
+          
+          # サーバーが立ち上がるまで少し待つ（5秒）
+          sleep 5
+          
+          # テスト実行（ルートに戻ってからqaフォルダへ）
+          cd ../qa
+          # スクリーンショット等のためにBASE_URL環境変数はデフォルトでOK
+          python -m pytest automation/tests/test_scenario_01.py
+
+      # 6. 証跡のアップロード（成功・失敗問わず保存）
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-evidence
+          path: qa/evidence/auto/
