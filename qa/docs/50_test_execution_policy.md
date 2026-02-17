@@ -1,24 +1,19 @@
 # テスト実行方針 - チケット管理アプリ
 
 - 文書ID：TXP-TICKET-001
-- 版：v0.2
-- ステータス：Draft
-- 最終更新日：2026-01-19
+- 版：v1.0
+- ステータス：Approved
+- 最終更新日：2026-02-17
 - 作成者：仁後慎太郎
 - 対象：チケット管理アプリ（Web, Django + SQLite）
 - 関連：
-  - テスト計画：`../docs/10_test_plan.md`
-  - テストケース：`../testcases/testcases.csv`
-  - テスト結果：`../results/test_results.csv`
-  - 欠陥ログ：`../defects/defect_log.csv`
-
----
-
+  - テスト計画書：[`docs/10_test_plan.md`](10_test_plan.md)
+  - テストケース：[`../testcases/testcases.csv`](../testcases/testcases.csv)
+  - テスト結果：[`../results/test_results.csv`](../results/test_results.csv)
+  - 欠陥ログ：[`../defects/defect_log.csv`](../defects/defect_log.csv)
 ## 1. 目的
 
 本ドキュメントは、テストの実行手順・判定基準・記録方法を統一し、結果の比較可能性と再現性を確保することを目的とする。
-
----
 
 ## 2. テスト対象アプリの特定
 
@@ -28,8 +23,6 @@
 - 対象アプリの版管理：
   - 原則：タグ（例：`app-v0.3`）またはコミットSHAで固定する
   - テスト結果CSVの「ビルド」列には、タグ名またはコミットSHAを記録する
-
----
 
 ## 3. 実行単位と記録先
 
@@ -43,8 +36,6 @@
   - 置き場所：`../defects/defect_log.csv`
   - 記録粒度：**1欠陥＝1行**
 
----
-
 ## 4. 実行方針
 
 各テストの実行方針は以下の通り。
@@ -53,7 +44,7 @@
 - 原則：P1 → P2 の順に実行する
 - P1で重大な欠陥が見つかった場合、関連領域のテストを優先して実行する（探索的に広げる）
 
-## 4.2 実行結果（判定）
+### 4.2 実行結果（判定）
 実行記録の「実行結果」は以下のいずれかで記録する。
 - 合格：期待値どおり
 - 不合格：期待値と差異がある
@@ -73,8 +64,6 @@
 - 不合格：原則、証跡を残す（スクショまたは短い動画）
 - 合格：重要ケース（P1）は必要に応じてスクショを残す
 - 実行不可：理由が分かるメモや画面を残す（可能なら）
-
----
 
 ## 5. 記録値・書式の統一ルール
 
@@ -138,13 +127,22 @@
 ### 5.6 ID採番のルール（REQ / TCND / TC / TR / DEFECT）
 本プロジェクトで扱うIDは、以下の命名規則に統一する。
 
-- 要件ID（Requirements）：`REQ-001` から連番（正本：`requirements/requirements.csv`）
-- テスト条件ID（Test Conditions）：`TCND-001` から連番（正本：`docs/20_test_conditions.md`）
-- テストケースID（Test Cases）：`TC-001` から連番（正本：`testcases/testcases.csv`）
-- リスクID(Risk)：`R-XX`から連番（正本：`docs/10_test_plan.md`）
-- テスト結果ID（Test Results）：`TR-0001` から連番（正本：`results/test_results.csv`）
-- 欠陥ID（Defects）：`DEFECT-001` から連番（正本：`defects/defect_log.csv`）
+- 要件ID（Requirements）：`REQ-001` から連番（正本：[要件仕様](../requirements/requirements.csv)）
+- テスト条件ID（Test Conditions）：`TCND-001` から連番（正本：[テスト条件](20_test_conditions.md)）
+- テストケースID（Test Cases）：`TC-001` から連番（正本：[テストケース](../testcases/testcases.csv)）
+- リスクID(Risk)：`R-XX`から連番（正本：[テスト計画書](10_test_plan.md)）
+- テスト結果ID（Test Results）：`TR-0001` から連番（正本：[テスト結果](../results/test_results.csv)）
+- 欠陥ID（Defects）：`DEFECT-001` から連番（正本：[欠陥ログ](../defects/defect_log.csv)）
 
 運用ルール：
 - 連番は欠番があってもよいが、**再利用しない**
 - 参照は原則として上位→下位（例：`REQ-001 → TCND-013 → TC-020`）で追跡できること
+
+## 6.CI環境でのテスト自動実行
+
+GitHub Actionsを利用し、コードの変更ごとに以下のステップを自動実行する。
+
+1. テスト用DBのクリーンアップとシードデータ投入。
+2. Django開発サーバーのバックグラウンド起動。
+3. Playwrightによるブラウザテストの実行。
+4. 実行証跡（スクショ）のアーティファクト保存。
