@@ -37,8 +37,6 @@
 
 ### 2.3 証跡
 - スクリーンショット：[evidence/screenshots/](../evidence/screenshots/)
-- 動画：[evidence/videos/](../evidence/videos/)
-- ログ：[evidence/logs/](../evidence/logs/)
 - 自動化ログ：[evidence/auto/](../evidence/auto/)
 
 ## 3. リポジトリの見方

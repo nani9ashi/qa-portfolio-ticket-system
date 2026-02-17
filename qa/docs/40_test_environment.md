@@ -41,8 +41,6 @@
 ## 4. 証跡（Evidence）の扱い
 
 - スクリーンショット：`../evidence/screenshots/`
-- 動画：`../evidence/videos/`
-- ログ：`../evidence/logs/`
 
 容量が大きい証跡は、必要に応じて圧縮または別手段で共有し、実行記録の「証跡」列から参照できるようにする。
 
