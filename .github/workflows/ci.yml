@@ -31,14 +31,17 @@ jobs:
 
       # 4. データベースの準備（マイグレーション & データ投入）
       - name: Prepare Database
+        env:
+          SECRET_KEY: "django-insecure-test-key-do-not-use-in-production"
         run: |
           cd app
           python manage.py migrate
           python manage.py seed_demo
 
       # 5. サーバー起動 & テスト実行
-      # バックグラウンド(&)でサーバーを立ち上げ、起動待機してからテスト
       - name: Run Server and Test
+        env:
+          SECRET_KEY: "django-insecure-test-key-do-not-use-in-production"
         run: |
           # アプリ起動（バックグラウンド）
           cd app
