@@ -96,11 +96,11 @@
 - Must：39件（カバー29 / 一部7 / 未カバー3）
 - Should：3件（カバー1 / 一部0 / 未カバー2）
 
-未カバー要件（70より）：
+未カバー要件（[トレーサビリティ](70_requirements_test_traceability.md)より）：
 - Must：RQ-024, RQ-028, RQ-032
 - Should：RQ-014, RQ-031
 
-一部カバー要件（70より）：
+一部カバー要件（[トレーサビリティ](70_requirements_test_traceability.md)より）：
 - RQ-002; RQ-004; RQ-005; RQ-006; RQ-008; RQ-027; RQ-029
 
 ## 6. 主要な欠陥と状況（定性）
