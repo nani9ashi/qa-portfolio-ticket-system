@@ -9,7 +9,7 @@ QAエンジニアとしてのスキルを示すための、チケット管理シ
 | カテゴリ | 技術・ツール | 用途 |
 | --- | --- | --- |
 | **Language** | Python 3.12 | アプリケーションおよびテストコード記述 |
-| **Framework** | Django 5.x | Webアプリケーション構築 (MVP) |
+| **Framework** | Django 6.0 | Webアプリケーション構築 (MVP) |
 | **Test Automation** | Playwright | E2Eテスト自動化、スクリーンショット取得 |
 | **Test Runner** | pytest | テスト実行管理 |
 | **CI/CD** | GitHub Actions | テスト実行・デプロイプロセスの自動化 |
