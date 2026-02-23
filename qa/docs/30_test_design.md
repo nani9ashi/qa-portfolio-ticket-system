@@ -7,9 +7,9 @@
 - 作成者：仁後慎太郎
 - 対象：チケット管理アプリ（Web, Django + SQLite）
 - 関連：
-  - テスト計画書：[`docs/10_test_plan.md`](10_test_plan.md)
-  - テスト条件：[`../docs/20_test_conditions.md`](20_test_conditions.md)
-  - テストケース：[`../testcases/testcases.csv`](../testcases/testcases.csv)
+  - [テスト計画書](10_test_plan.md)
+  - [テスト条件](20_test_conditions.md)
+  - [テストケース](../testcases/testcases.csv)
 
 ## 1. 目的
 

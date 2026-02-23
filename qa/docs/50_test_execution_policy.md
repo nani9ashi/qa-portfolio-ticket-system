@@ -7,10 +7,12 @@
 - 作成者：仁後慎太郎
 - 対象：チケット管理アプリ（Web, Django + SQLite）
 - 関連：
-  - テスト計画書：[`docs/10_test_plan.md`](10_test_plan.md)
-  - テストケース：[`../testcases/testcases.csv`](../testcases/testcases.csv)
-  - テスト結果：[`../results/test_results.csv`](../results/test_results.csv)
-  - 欠陥ログ：[`../defects/defect_log.csv`](../defects/defect_log.csv)
+  - [テスト計画書](10_test_plan.md)
+  - [テストケース](../testcases/testcases.csv)
+  - [テスト結果](../results/test_results.csv)
+  - [欠陥ログ](../defects/defect_log.csv)
+  - [テスト環境定義](40_test_environment.md)
+
 ## 1. 目的
 
 本ドキュメントは、テストの実行手順・判定基準・記録方法を統一し、結果の比較可能性と再現性を確保することを目的とする。

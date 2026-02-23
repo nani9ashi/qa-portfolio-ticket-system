@@ -7,10 +7,10 @@
 - 作成者：仁後慎太郎
 - 対象：チケット管理アプリ（Web, Django + SQLite）
 - 関連：
-  - 要件仕様：[`../requirements/requirements.csv`](../requirements/requirements.csv)
-  - テストケース：[`../testcases/testcases.csv`](../testcases/testcases.csv)
-  - テスト結果：[`../results/test_results.csv`](../results/test_results.csv)
-  - 欠陥ログ：[`../defects/defect_log.csv`](../defects/defect_log.csv)
+  - [要件仕様](../requirements/requirements.csv)
+  - [テストケース](../testcases/testcases.csv)
+  - [テスト結果](../results/test_results.csv)
+  - [欠陥ログ](../defects/defect_log.csv)
 
 ## 1. 目的
 
@@ -19,25 +19,25 @@
 ## 2. 成果物の構成
 
 ### 2.1 ドキュメント
-- テスト計画書：[docs/10_test_plan.md](10_test_plan.md)
-- テスト条件：[docs/20_test_conditions.md](20_test_conditions.md)
-- テスト設計：[docs/30_test_design.md](30_test_design.md)
-- テスト環境定義：[docs/40_test_environment.md](40_test_environment.md)
-- テスト実行方針：[docs/50_test_execution_policy.md](50_test_execution_policy.md)
-- テスト完了レポート：[docs/60_test_completion_report.md](60_test_completion_report.md)
-- 要件とテストのトレーサビリティ：[docs/70_requirements_test_traceability.md](70_requirements_test_traceability.md)
+- [テスト計画書](10_test_plan.md)
+- [テスト条件](20_test_conditions.md)
+- [テスト設計](30_test_design.md)
+- [テスト環境定義](40_test_environment.md)
+- [テスト実行方針](50_test_execution_policy.md)
+- [テスト完了レポート](60_test_completion_report.md)
+- [要件とテストのトレーサビリティ](70_requirements_test_traceability.md)
 
 ### 2.2 CSV
-- テストケース：[testcases/testcases.csv](../testcases/testcases.csv)  
+- [テストケース](../testcases/testcases.csv)  
   ※実行状況は含めず、設計情報に集中しています。
-- テスト結果：[results/test_results.csv](../results/test_results.csv)  
+- [テスト結果](../results/test_results.csv)  
   ※1実行=1行で追記します。
-- 欠陥ログ：[defects/defect_log.csv](../defects/defect_log.csv)  
+- [欠陥ログ](../defects/defect_log.csv)  
   ※1欠陥=1行で管理します。
 
 ### 2.3 証跡
-- スクリーンショット：[evidence/screenshots/](../evidence/screenshots/)
-- 自動化ログ：[evidence/auto/](../evidence/auto/)
+- [スクリーンショット](../evidence/screenshots/)
+- [自動化ログ](../evidence/auto/)
 
 ## 3. リポジトリの見方
 

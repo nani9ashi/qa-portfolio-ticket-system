@@ -7,12 +7,12 @@
 - 作成者：仁後慎太郎
 - 対象：チケット管理アプリ（Web, Django + SQLite）
 - 関連：
-  - 要件仕様：[`../requirements/requirements.csv`](../requirements/requirements.csv)（RQ-001～）
-  - テスト条件：[`docs/20_test_conditions.md`](20_test_conditions.md)（TCND-001〜）
-  - テストケース：[`../testcases/testcases.csv`](../testcases/testcases.csv)（TC-001〜）
-  - テスト計画書：[`docs/10_test_plan.md`](10_test_plan.md)（R-01〜）
-  - テスト結果：[`../results/test_results.csv`](../results/test_results.csv)（TR-0001～）
-  - 欠陥ログ：[`defects/defect_log.csv`](../defects/defect_log.csv) （DEFECT-001～）
+  - [要件仕様](../requirements/requirements.csv)（RQ-001～）
+  - [テスト条件](20_test_conditions.md)（TCND-001〜）
+  - [テストケース](../testcases/testcases.csv)（TC-001〜）
+  - [テスト計画書](10_test_plan.md)（R-01〜）
+  - [テスト結果](../results/test_results.csv)（TR-0001～）
+  - [欠陥ログ](../defects/defect_log.csv) （DEFECT-001～）
 
 ## 1. 目的
 

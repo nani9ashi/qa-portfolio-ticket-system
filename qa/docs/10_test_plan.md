@@ -7,13 +7,13 @@
 - 作成者：仁後慎太郎
 - 対象：チケット管理アプリ（Web, Django + SQLite）
 - 関連：
-  - 要件仕様：[`../requirements/requirements.csv`](../requirements/requirements.csv)
-  - 要件とテストのトレーサビリティ：[`../docs/70_requirements_test_traceability.md`](70_requirements_test_traceability.md)
-  - テスト条件：[`../docs/20_test_conditions.md`](20_test_conditions.md)
-  - テスト設計：[../docs/30_test_design.md`](30_test_design.md)
-  - テストケース：[`../testcases/testcases.csv`](../testcases/testcases.csv)
-  - テスト結果：[`../results/test_results.csv`](../results/test_results.csv)
-  - 欠陥ログ：[`../defects/defect_log.csv`](../defects/defect_log.csv)
+  - [要件仕様](../requirements/requirements.csv)
+  - [要件とテストのトレーサビリティ](70_requirements_test_traceability.md)
+  - [テスト条件](20_test_conditions.md)
+  - [テスト設計](30_test_design.md)
+  - [テストケース](../testcases/testcases.csv)
+  - [テスト結果](../results/test_results.csv)
+  - [欠陥ログ](../defects/defect_log.csv)
 
 ## 1. 目的
 

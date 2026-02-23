@@ -1,8 +1,8 @@
 テスト結果ID,実行日時,実行者,実行環境,ビルド,テスト種別,テストケースNo,実行結果,証跡,欠陥ID,備考
-TR-0001,2026/01/13 15:34:00,仁後慎太郎,Win11/Chrome,app-defect-idor,新規,TC-002,不合格,TR-0001.png,DEFECT-001,Requesterが他人チケット詳細を閲覧できた
-TR-0002,2026/01/13 15:42:00,仁後慎太郎,Win11/Chrome,app-defect-idor,新規,TC-003,不合格,TR-0002.png,DEFECT-001,URL内IDを書き換えて他人チケット詳細が表示された
-TR-0003,2026/01/19 10:18:00,仁後慎太郎,Win11/Chrome,app-v0.3,回帰,TC-002,合格,TR-0003.png,DEFECT-001,修正版でforbidden表示を確認（他人チケット詳細は閲覧不可）
-TR-0004,2026/01/19 10:23:00,仁後慎太郎,Win11/Chrome,app-v0.3,回帰,TC-003,合格,TR-0004.png,DEFECT-001,URLのID改変でもforbidden表示を確認
+TR-0001,2026/01/13 15:34:00,仁後慎太郎,Win11/Chrome,app-defect-idor,新規,TC-002,不合格,TR-0001.png,DEFECT-001,Requesterが他人チケット詳細を閲覧できた(IDOR=ON)
+TR-0002,2026/01/13 15:42:00,仁後慎太郎,Win11/Chrome,app-defect-idor,新規,TC-003,不合格,TR-0002.png,DEFECT-001,URL内IDを書き換えて他人チケット詳細が表示された(IDOR=ON)
+TR-0003,2026/01/19 10:18:00,仁後慎太郎,Win11/Chrome,app-v0.3,回帰,TC-002,合格,TR-0003.png,DEFECT-001,修正版でforbidden表示され他人チケット詳細の閲覧不可を確認(IDOR=OFF)
+TR-0004,2026/01/19 10:23:00,仁後慎太郎,Win11/Chrome,app-v0.3,回帰,TC-003,合格,TR-0004.png,DEFECT-001,URLのID改変でもforbidden表示を確認(IDOR=OFF)
 TR-0005,2026/02/05 9:52:00,仁後慎太郎,Win11/Chrome,app-v0.3,新規,TC-001,合格,TR-0005.png,,
 TR-0006,2026/02/05 10:32:00,仁後慎太郎,Win11/Chrome,app-v0.3,新規,TC-004,合格,TR-0006.png,,
 TR-0007,2026/02/05 10:37:00,仁後慎太郎,Win11/Chrome,app-v0.3,新規,TC-005,合格,TR-0007.png,,
