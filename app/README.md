@@ -70,7 +70,7 @@ python manage.py runserver
 | 担当割当 | × | × | ○ |
 | 期限変更 | × | × | ○ |
 
-## 6. ステータス遷移仕様
+## 🔄 6. ステータス遷移仕様（State Machine）
 
 ### ✅許可ルート
 - Open → In Progress / Pending
