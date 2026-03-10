@@ -10,8 +10,8 @@
 - 検出ビルド：app-defect-idor
 - 関連テストケース：TC-002, TC-003
 - 証跡：
-  - evidence/screenshots/TR-0001.png（TC-002）
-  - evidence/screenshots/TR-0002.png（TC-003）
+  - [TC-002のスクリーンショット](../../evidence/screenshots/TR-0001.png)
+  - [TC-003のスクリーンショット](../../evidence/screenshots/TR-0002.png)
 - 備考：
 
 ## 概要
