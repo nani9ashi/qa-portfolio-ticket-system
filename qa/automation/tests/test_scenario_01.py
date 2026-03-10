@@ -55,7 +55,7 @@ def test_create_ticket_and_verify(page: Page):
     body_cell = page.locator("tr", has_text="Body").locator("pre")
     expect(body_cell).to_have_text(test_body)
     
-# ----------------------------------------
+    # ----------------------------------------
     # Step 4: 証跡の保存
     # ----------------------------------------
     # "evidence/auto" フォルダに保存するように変更

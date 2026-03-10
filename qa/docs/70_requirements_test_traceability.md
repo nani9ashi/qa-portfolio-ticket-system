@@ -25,6 +25,8 @@
 - **RQ → TCND → TC** の対応（要件カバレッジ判断に直結）
 
 ### 2.2 本書で管理しないもの（参照に留める）
+- **RQ（要件本文）**  
+  → [要件仕様](../requirements/requirements.csv) を正とする
 - **TCND（定義本文）**  
   → [テスト条件](20_test_conditions.md) を正とする
 - **TCND → TC の“全量一覧”**  
