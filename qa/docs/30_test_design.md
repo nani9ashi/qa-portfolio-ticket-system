@@ -1,7 +1,7 @@
 # テスト設計 - チケット管理アプリ
 
 - 文書ID：TD-TICKET-001
-- 版：v1.1
+- 版：v1.2
 - ステータス：Approved
 - 最終更新日：2026-03-11
 - 作成者：仁後慎太郎
@@ -29,27 +29,21 @@
 stateDiagram-v2
     state "In Progress" as InProgress
 
-    [*] --> Open : 「Create」ボタンクリック [Admin または Requester]
+    [*] --> Open : 「Create」ボタンクリック
 
-    Open --> InProgress : 「Update」ボタンクリック [Admin または 担当Agent]
-    Open --> Pending : 「Update」ボタンクリック [Admin または 担当Agent]
+    Open --> InProgress : 「Update」ボタンクリック
+    Open --> Pending : 「Update」ボタンクリック
 
-    InProgress --> Resolved : 「Update」ボタンクリック [Admin または 担当Agent]
-    InProgress --> Pending : 「Update」ボタンクリック [Admin または 担当Agent]
+    InProgress --> Resolved : 「Update」ボタンクリック
+    InProgress --> Pending : 「Update」ボタンクリック
 
-    Pending --> InProgress : 「Update」ボタンクリック [Admin または 担当Agent]
+    Pending --> InProgress : 「Update」ボタンクリック
 
-    Resolved --> Closed : 「Update」ボタンクリック [Admin または 担当Agent]
+    Resolved --> Closed : 「Update」ボタンクリック
 ```
-### 補足：状態遷移のトリガー（画面操作）について
-本システムにおいて、図中の「ステータス変更」イベントは、実際のUIでは以下の操作によって実行されます。
+※ Create は Admin または Requester が実行可能
+※ Update は Admin または担当Agent が実行可能
 
-| イベント名 | 実際の画面操作（UI） |
-| :--- | :--- |
-| **チケット作成 (Openへ)** | 1. ダッシュボードの「新規作成」ボタンをクリック<br>2. 必須項目を入力し「Create」ボタンをクリック |
-| **ステータス変更 (それ以外)** | 1. チケット詳細画面を開く<br>2. 画面下部の「Status」プルダウンから遷移先を選択<br>3. 「Update」ボタンをクリック |
-
-※具体的なテスト手順（Step-by-Stepの操作）については、別途「テスト設計書（テストケース）」にて定義しています。
 ### 3.2 権限マトリクス（Decision Table）
 | 操作 | 依頼者 | 担当者 | 管理者 |
 | 区分 | 項目 | 値 | 1 | 2 | 3 | 4 | 5 |
