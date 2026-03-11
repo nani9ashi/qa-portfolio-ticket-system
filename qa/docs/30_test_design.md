@@ -29,19 +29,27 @@
 stateDiagram-v2
     state "In Progress" as InProgress
 
-    [*] --> Open : チケット作成 / Openで起票
+    [*] --> Open : 「Create」ボタンクリック [Admin または Requester]
 
-    Open --> InProgress : ステータス変更 [Admin または 担当Agent] / 状態更新・履歴追加
-    Open --> Pending : ステータス変更 [Admin または 担当Agent] / 状態更新・履歴追加
+    Open --> InProgress : 「Update」ボタンクリック [Admin または 担当Agent]
+    Open --> Pending : 「Update」ボタンクリック [Admin または 担当Agent]
 
-    InProgress --> Resolved : ステータス変更 [Admin または 担当Agent] / 状態更新・履歴追加
-    InProgress --> Pending : ステータス変更 [Admin または 担当Agent] / 状態更新・履歴追加
+    InProgress --> Resolved : 「Update」ボタンクリック [Admin または 担当Agent]
+    InProgress --> Pending : 「Update」ボタンクリック [Admin または 担当Agent]
 
-    Pending --> InProgress : ステータス変更 [Admin または 担当Agent] / 状態更新・履歴追加
+    Pending --> InProgress : 「Update」ボタンクリック [Admin または 担当Agent]
 
-    Resolved --> Closed : ステータス変更 [Admin または 担当Agent] / 状態更新・履歴追加
+    Resolved --> Closed : 「Update」ボタンクリック [Admin または 担当Agent]
 ```
+### 補足：状態遷移のトリガー（画面操作）について
+本システムにおいて、図中の「ステータス変更」イベントは、実際のUIでは以下の操作によって実行されます。
 
+| イベント名 | 実際の画面操作（UI） |
+| :--- | :--- |
+| **チケット作成 (Openへ)** | 1. ダッシュボードの「新規作成」ボタンをクリック<br>2. 必須項目を入力し「Create」ボタンをクリック |
+| **ステータス変更 (それ以外)** | 1. チケット詳細画面を開く<br>2. 画面下部の「Status」プルダウンから遷移先を選択<br>3. 「Update」ボタンをクリック |
+
+※具体的なテスト手順（Step-by-Stepの操作）については、別途「テスト設計書（テストケース）」にて定義しています。
 ### 3.2 権限マトリクス（Decision Table）
 | 操作 | 依頼者 | 担当者 | 管理者 |
 | 区分 | 項目 | 値 | 1 | 2 | 3 | 4 | 5 |
