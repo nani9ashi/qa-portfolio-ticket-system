@@ -41,8 +41,8 @@ stateDiagram-v2
 
     Resolved --> Closed : 「Update」ボタンクリック
 ```
-※ Create は Admin または Requester が実行可能
-※ Update は Admin または担当Agent が実行可能
+- Create は Admin または Requester が実行可能
+- Update は Admin または担当Agent が実行可能
 
 ### 3.2 権限マトリクス（Decision Table）
 | 操作 | 依頼者 | 担当者 | 管理者 |
