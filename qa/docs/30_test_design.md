@@ -25,26 +25,36 @@
 ## 3. モデル
 
 ### 3.1 状態遷移モデル（State Transition）
-| From \ To | In Progress | Pending | Resolved | Closed |
-| --- | --- | --- | --- | --- |
-| Open | ○ | ○ | × | × |
-| In Progress | × | ○ | ○ | × |
-| Pending | ○ | × | ○ | × |
-| Resolved | × | × | × | ○ |
-| Closed | × | × | × | × |
+```mermaid
+stateDiagram-v2
+    state "In Progress" as InProgress
 
-期待：×の遷移はUI/直接操作のいずれでも拒否される。
+    [*] --> Open : チケット作成 / Openで起票
+
+    Open --> InProgress : ステータス変更 [Admin または 担当Agent] / 状態更新・履歴追加
+    Open --> Pending : ステータス変更 [Admin または 担当Agent] / 状態更新・履歴追加
+
+    InProgress --> Resolved : ステータス変更 [Admin または 担当Agent] / 状態更新・履歴追加
+    InProgress --> Pending : ステータス変更 [Admin または 担当Agent] / 状態更新・履歴追加
+
+    Pending --> InProgress : ステータス変更 [Admin または 担当Agent] / 状態更新・履歴追加
+
+    Resolved --> Closed : ステータス変更 [Admin または 担当Agent] / 状態更新・履歴追加
+```
 
 ### 3.2 権限マトリクス（Decision Table）
 | 操作 | 依頼者 | 担当者 | 管理者 |
-| --- | --- | --- | --- |
-| チケット作成 | ○ | ○ | ○ |
-| 自分のチケット参照 | ○ | ○ | ○ |
-| 他人のチケット参照 | × | ○ | ○ |
-| ステータス変更 | × | ○ | ○ |
-| コメント追加 | ○ | ○ | ○ |
-| 担当割当（Assign） | × | × | ○ |
-| ユーザ/設定管理 | × | × | ○ |
+| 区分 | 項目 | 値 | 1 | 2 | 3 | 4 | 5 |
+|---|---|---|---|---|---|---|---|
+| 有効/無効 |  |  | [x] | [x] | [x] | [x] | [x] |
+|  |  |  | 1 | 2 | 3 | 4 | 5 |
+| 条件 | 現在ステータスがClosedである |  | Y | N | N | N | N |
+|  | ロール（Admin） | Admin |  | Y | N | N | N |
+|  |  | Agent |  | N | Y | Y | N |
+|  |  | Requester |  | N | N | N | Y |
+|  | チケット担当が自分である |  |  |  | Y | N |  |
+| 動作 | ステータス変更を許可 |  |  | X | X |  |  |
+|  | ステータス変更を禁止 |  | X |  |  | X | X |
 
 ## 4. カバレッジアイテム（Coverage Items）
 
