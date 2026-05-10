@@ -58,8 +58,8 @@ root/
 | :--- | :--- | :--- |
 | **目的** | 仕様の深掘り、探索的テスト、ユーザビリティ確認 | 回帰テスト（リグレッション）、CI品質ゲート |
 | **対象** | 複雑なビジネスロジック、エッジケース、異常系 | 正常系（Happy Path）、基本的な権限確認 |
-| **成果物** | [JSTQB準拠ドキュメント一式](/qa/docs/00_project_overview.md)  | [Playwrightコード](/qa/automation/tests/test_scenario_01.py) |
-| **規模** | **テストケース数: 46件**（網羅性を重視） | **シナリオ数: 1件**（実行速度を重視） |
+| **成果物** | [JSTQB準拠ドキュメント一式](/qa/docs/00_project_overview.md)  | [Playwrightコード](/qa/automation/tests/) |
+| **規模** | **テストケース数: 46件** | **シナリオ数: 4件** |
 
 ---
 
@@ -70,11 +70,12 @@ Vモデルを意識し、要求分析から完了報告までを一貫してド�
 - **テスト技法**: 同値分割法、境界値分析を用いた効率的なケース設計。
 - **欠陥管理**: バグの発見から修正確認までをレポート化し、開発側へのフィードバックを実施。
 
-### 2. E2Eテストの完全自動化（自動）
-手動テストで安定稼働を確認した「クリティカルパス」をコード化し、リグレッションを自動検知します。
-- **堅牢な実装 (Robust Automation)**: `name`属性などの不変属性を用いたロケータ戦略に基づく保守性の高いテスト実装。
-- **Framework**: Playwright + pytest を使用。
-- **CI/CD**: GitHub Actionsにより、PR作成時に自動実行。
+### 2. E2Eテストの完全自動化（自動・4シナリオ）
+手動テストで安定稼働を確認した「クリティカルパス」と、QAリスク観点（IDOR／境界値／RBAC）の代表シナリオをコード化し、リグレッションを自動検知します。
+- **シナリオ構成**: ハッピーパス（Auto-01）／IDOR回帰（Auto-02、DEFECT-001由来）／本文境界値（Auto-03）／非担当Agentの認可（Auto-04）。詳細は [60_test_completion_report.md §11](./qa/docs/60_test_completion_report.md#11-付記テスト自動化の実施結果-automated-test-summary)。
+- **堅牢な実装 (Robust Automation)**: `name`属性などの不変属性を用いたロケータ戦略。共通fixture（`qa/automation/conftest.py`）でログイン・BASE_URL・証跡保存を集約。
+- **Framework**: Playwright + pytest を使用。`BASE_URL` 環境変数で接続先切替可。
+- **CI/CD**: GitHub Actionsにより、PR作成時に4シナリオすべてを自動実行。
 
 ### 3. "Shift Left" を意識した構成
 開発コード（`app`）とテストコード（`qa`）を同一リポジトリで管理することで、開発サイクルの中に品質保証プロセスを組み込んでいます。

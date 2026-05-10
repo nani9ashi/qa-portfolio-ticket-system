@@ -1,5 +1,6 @@
 ﻿from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxLengthValidator
 from django.db import models
 from django.utils import timezone
 import os
@@ -31,7 +32,7 @@ def validate_attachment(f):
 
 class Ticket(models.Model):
     title = models.CharField(max_length=80)
-    body = models.TextField(max_length=4000)
+    body = models.TextField(max_length=4000, validators=[MaxLengthValidator(4000)])
     status = models.CharField(max_length=20, choices=TicketStatus.choices, default=TicketStatus.OPEN)
 
     due_date = models.DateField(null=True, blank=True)

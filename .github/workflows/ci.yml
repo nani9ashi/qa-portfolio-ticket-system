@@ -42,18 +42,18 @@ jobs:
       - name: Run Server and Test
         env:
           SECRET_KEY: "django-insecure-test-key-do-not-use-in-production"
+          BASE_URL: "http://127.0.0.1:8000"
         run: |
           # アプリ起動（バックグラウンド）
           cd app
           python manage.py runserver 127.0.0.1:8000 &
-          
+
           # サーバーが立ち上がるまで少し待つ（5秒）
           sleep 5
-          
-          # テスト実行（ルートに戻ってからqaフォルダへ）
-          cd ../qa
-          # スクリーンショット等のためにBASE_URL環境変数はデフォルトでOK
-          python -m pytest automation/tests/test_scenario_01.py
+
+          # テスト実行（ルートに戻ってからqaフォルダへ。pytest.iniのtestpaths=testsで自動探索）
+          cd ../qa/automation
+          python -m pytest
 
       # 6. 証跡のアップロード（成功・失敗問わず保存）
       - name: Upload Artifacts

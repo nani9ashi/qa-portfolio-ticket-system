@@ -1,9 +1,9 @@
 # テスト環境定義 - チケット管理アプリ
 
 - 文書ID：TE-TICKET-001
-- 版：v1.1
+- 版：v1.2
 - ステータス：Approved
-- 最終更新日：2026-02-24
+- 最終更新日：2026-05-10
 - 作成者：仁後慎太郎
 - 対象：チケット管理アプリ（Web, Django + SQLite）
 - 関連：
@@ -30,9 +30,12 @@
 PlaywrightおよびGitHub Actionsを用いたE2Eテストの実行環境を定義する。
 
 ### 3.1 ローカル自動テスト環境
-- フレームワーク：Playwright (Python) + pytest
+- フレームワーク：Playwright (Python) + pytest（バージョン固定：`pytest==9.0.2` / `pytest-playwright==0.7.2`）
 - ブラウザ：Chromium (Headless / Headed モード切替可)
-- 実行形態：CLI経由でのテストランナー実行
+- 実行形態：CLI経由でのテストランナー実行（`cd qa/automation && python -m pytest`）
+- 共通fixture：`qa/automation/conftest.py` に `login` / `base_url` / `evidence_dir` を集約。シナリオ追加時のボイラープレートを最小化。
+- 接続先切替：`BASE_URL` 環境変数で指定可能（既定：`http://127.0.0.1:8000`）。CI／ローカル／別ポートを1コマンドで切替。
+- 設定ファイル：`qa/automation/pytest.ini` で `testpaths=tests` を定義し、自動検索を有効化。
 
 ### 3.2 CI/CDパイプライン環境
 - 実行基盤：GitHub Actions (`ubuntu-latest` ランナー)
