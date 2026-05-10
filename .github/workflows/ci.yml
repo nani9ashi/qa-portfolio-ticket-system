@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI Pipeline
 
 on:
   push:
@@ -61,4 +61,4 @@ jobs:
         if: always()
         with:
           name: e2e-evidence
-          path: qa/evidence/auto/
+          path: qa/automation/evidence/auto/

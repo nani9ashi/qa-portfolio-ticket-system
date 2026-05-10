@@ -77,7 +77,7 @@ Playwright を用いたE2E自動テストを構築し、GitHub Actions による
 ### 技術スタック
 - **Framework**: Playwright (Python)
 - **Test Runner**: pytest（共通 fixture は `automation/conftest.py` に集約）
-- **CI/CD**: GitHub Actions
+- **CI**: GitHub Actions
 ---
 
 ## 自動テストの実行方法

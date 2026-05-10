@@ -1,16 +1,16 @@
 # Ticket Management System with QA Automation
-[![CI/CD Pipeline](https://github.com/nani9ashi/ticket-management-system/actions/workflows/ci.yml/badge.svg)](https://github.com/nani9ashi/ticket-management-system/actions/workflows/ci.yml)
+[![CI Pipeline](https://github.com/nani9ashi/ticket-management-system/actions/workflows/ci.yml/badge.svg)](https://github.com/nani9ashi/ticket-management-system/actions/workflows/ci.yml)
 
 ## このポートフォリオの位置付け
 
-本ポートフォリオは **QAエンジニアの基礎技術習得**（CI/CD・E2E自動化・JSTQB準拠のドキュメンテーション）を目的として作成したものです。
+本ポートフォリオは **QAエンジニアの基礎技術習得**（CI・E2E自動化・JSTQB準拠のドキュメンテーション）を目的として作成したものです。
 その後、**戦略的な品質保証・関係者連携・AIプロダクトの品質設計**の観点を深めるために、追加で
 [AI学習レコメンドポートフォリオ](https://github.com/nani9ashi/qa-portfolio-ai-recommender)
 を構築しています。
 2点を「学習の深化の軌跡」としてご覧いただければ幸いです。
 
 ## プロジェクト概要
-本リポジトリは、BtoB向けチケット管理システムの開発から、JSTQB準拠の品質保証（QA）プロセス、およびCI/CDパイプライン構築までを一人称で完遂した統合ポートフォリオです。
+本リポジトリは、BtoB向けチケット管理システムの開発から、JSTQB準拠の品質保証（QA）プロセス、およびCIパイプライン構築までを一人称で完遂した統合ポートフォリオです。
 
 単なる動作確認にとどまらず、**「複雑な権限管理」や「状態遷移制約」を持つ実務的なシステム**を対象に、"Shift Left（テストの前倒し）"の思想に基づいた自動化・仕組み化をコードベースで実現しています。
 
@@ -21,7 +21,7 @@
 | **Framework** | Django 6.0 | Webアプリケーション構築 (MVP) |
 | **Test Automation** | Playwright | E2Eテスト自動化、スクリーンショット取得 |
 | **Test Runner** | pytest | テスト実行管理 |
-| **CI/CD** | GitHub Actions | テスト実行・デプロイプロセスの自動化 |
+| **CI** | GitHub Actions | E2Eテストの自動実行と証跡保存 |
 | **Environment** | venv / pip | 仮想環境およびパッケージ管理 |
 
 ## テスト対象システム (SUT: System Under Test)
@@ -36,7 +36,7 @@ QAの実践性を高めるため、単なるCRUDアプリではなく、BtoB業�
 
 ```text
 root/
-├── .github/workflows/  # CI/CD設定 (GitHub Actionsによる自動テスト実行)
+├── .github/workflows/  # CI設定 (GitHub Actionsによる自動テスト実行)
 ├── app/                # アプリケーション本体 (Django)
 └── qa/                 # QA統合成果物 (JSTQBプロセス準拠)
 ```
@@ -72,7 +72,7 @@ Vモデルを意識し、要求分析から完了報告までを一貫してド�
 - **シナリオ構成**: ハッピーパス（Auto-01）／IDOR回帰（Auto-02、DEFECT-001由来）／本文境界値（Auto-03）／非担当Agentの認可（Auto-04）。詳細は [60_test_completion_report.md §11](./qa/docs/60_test_completion_report.md#11-付記テスト自動化の実施結果-automated-test-summary)。
 - **堅牢な実装 (Robust Automation)**: `name`属性などの不変属性を用いたロケータ戦略。共通fixture（`qa/automation/conftest.py`）でログイン・BASE_URL・証跡保存を集約。
 - **Framework**: Playwright + pytest を使用。`BASE_URL` 環境変数で接続先切替可。
-- **CI/CD**: GitHub Actionsにより、PR作成時に4シナリオすべてを自動実行。
+- **CI**: GitHub Actionsにより、PR作成時に4シナリオすべてを自動実行。
 
 ### 3. "Shift Left" を意識した構成
 開発コード（`app`）とテストコード（`qa`）を同一リポジトリで管理することで、開発サイクルの中に品質保証プロセスを組み込んでいます。
