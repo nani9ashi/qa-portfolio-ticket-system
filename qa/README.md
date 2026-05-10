@@ -82,17 +82,4 @@ Playwright を用いたE2E自動テストを構築し、GitHub Actions による
 
 ## 自動テストの実行方法
 
-ルートディレクトリで仮想環境を有効化した状態で、以下のコマンドを実行してください。
-
-```powershell
-# qa/automation ディレクトリへ移動（pytest.ini が自動探索する）
-cd qa/automation
-
-# 全シナリオ実行（ブラウザ表示あり）
-python -m pytest --headed
-
-# 個別シナリオ実行（例：IDOR回帰のみ）
-python -m pytest tests/test_scenario_02_idor.py --headed
-```
-
-`BASE_URL` 環境変数で接続先を切り替えられます（既定：`http://127.0.0.1:8000`）。
+セットアップ手順とテスト実行コマンド（個別シナリオ実行・`--headed`・`BASE_URL` 切替など）は **[../SETUP.md](../SETUP.md)** に集約しています。

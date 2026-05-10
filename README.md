@@ -87,55 +87,11 @@ JSTQB のテスト計画における「説明責任（accountability）」を意
 
 未カバー要件の扱いについては、[要件とテストのトレーサビリティ](./qa/docs/70_requirements_test_traceability.md) で A（追加してカバー）／ B（スコープ外）／ C（要件を修正・明確化）に分類して管理しています。
 
-## 動作確認方法 (Local)
+## 動作確認
 
-このリポジトリをクローンして、手元で動作させる手順です。  
-※本手順では、アプリの実行とテストの実行にそれぞれ仮想環境（venv）の有効化が必要です。
+CIで `push` / `pull_request` 時に4シナリオすべてを自動実行しています（上部バッジ参照）。
 
-### 1. 共通準備 (Setup)
-
-まず、ベースとなる環境を構築します。
-
-```bash
-# クローンと移動
-git clone https://github.com/<YOUR_ID>/ticket-management-system.git
-cd ticket-management-system
-
-# 仮想環境の作成
-python -m venv .venv
-```
-
-#### 仮想環境の有効化（OS別）
-> ※ 以降の `pip install` や `playwright install` は、仮想環境を有効化した状態で実行してください。
-
-**Windows (PowerShell)**
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-**macOS / Linux**
-```bash
-source .venv/bin/activate
-```
-
-#### 依存関係のインストール
-```bash
-pip install -r requirements.txt
-playwright install chromium
-```
-
-### 2. アプリとテストの実行
-
-**必ず「2つのターミナル」を使用し、両方で仮想環境を有効にしてください。**
-
-| 手順 | **ターミナル1（サーバー起動）** | **ターミナル2（テスト実行）** |
-| --- | --- | --- |
-| 1. ルートへ移動 | `cd ticket-management-system` | `cd ticket-management-system` |
-| 2. 仮想環境を有効化 | Windows: `.\.venv\Scripts\Activate.ps1`<br>mac/Linux: `source .venv/bin/activate` | Windows: `.\.venv\Scripts\Activate.ps1`<br>mac/Linux: `source .venv/bin/activate` |
-| 3. 実行 | `cd app`<br>`python manage.py migrate`<br>`python manage.py runserver` | `cd qa`<br>`python -m pytest automation/tests/ --headed --slowmo 1000` |
-
-> **Note**: ターミナル2を実行する前に、ターミナル1でサーバーが正常に起動していることを確認してください。  
-> 例：`Starting development server at http://127.0.0.1:8000/`
+手元で動かして確かめたい場合は、**[SETUP.md](./SETUP.md)** に手順を集約しています（クローン → 仮想環境 → 依存インストール → DB初期化 → サーバー起動 → テスト実行）。
 
 ## 作者
 

@@ -27,20 +27,7 @@ QA成果物に落とし込みやすい題材として、業務アプリの品質
 
 ## 3. セットアップ
 
-本リポジトリはMonorepo構成です。ルートディレクトリで仮想環境（`venv`）を構築済みであることを前提とします。
-
-### 3.1 DB初期化とデモデータ投入
-```powershell
-# ルートディレクトリから app フォルダへ移動
-cd app
-
-# マイグレーションとデモデータの投入
-python manage.py migrate
-python manage.py seed_demo
-
-# サーバー起動
-python manage.py runserver
-```
+セットアップ手順は **[../SETUP.md](../SETUP.md)** に集約しています（クローン → 仮想環境 → 依存インストール → DB初期化 → サーバー起動 → テスト実行）。
 
 起動後のアクセス先：
 - ログイン画面：`http://127.0.0.1:8000/accounts/login/`
