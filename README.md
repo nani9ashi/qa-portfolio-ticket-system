@@ -1,4 +1,4 @@
-# Ticket Management System with QA Automation
+# BtoB チケット管理システム：QA技術ポートフォリオ
 [![CI Pipeline](https://github.com/nani9ashi/ticket-management-system/actions/workflows/ci.yml/badge.svg)](https://github.com/nani9ashi/ticket-management-system/actions/workflows/ci.yml)
 
 ## このポートフォリオの位置付け
