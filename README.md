@@ -80,13 +80,13 @@ Vモデルを意識し、要求分析から完了報告までを一貫してド�
 
 **Auto-04 — 非担当Agentの認可UI抑止**
 
-![Auto-04: 非担当AgentはステータスUIを操作できない](./docs/images/auto-04_agent_no_status_ui.png)
+![Auto-04: 非担当AgentはステータスUIを操作できない](./qa/docs/images/auto-04_agent_no_status_ui.png)
 
 agent2 が非担当チケット（agent1割当）を開くと、Status Transition は「Not allowed to change status.」のみで `<select>` が描画されない。Comments / History は閲覧可能 —「**見えるが触れない**」というRBACの繊細な挙動が一枚で伝わる。
 
 **Auto-03 — DEFECT-002 修正後の本文バリデーション**
 
-![Auto-03: 本文4001文字のサーバ側拒否](./docs/images/auto-03_body_validation_error.png)
+![Auto-03: 本文4001文字のサーバ側拒否](./qa/docs/images/auto-03_body_validation_error.png)
 
 本文4001文字での作成試行に対し、`Ensure this value has at most 4000 characters (it has 4001).` を表示して拒否。本シナリオの実装中に **[DEFECT-002](./qa/defects/reports/DEFECT-002.md)（body max_length 未実装）** を検出・修正・回帰確認した。
 
