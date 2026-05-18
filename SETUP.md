@@ -12,8 +12,8 @@
 ## 1. クローンと仮想環境
 
 ```bash
-git clone https://github.com/nani9ashi/ticket-management-system.git
-cd ticket-management-system
+git clone https://github.com/nani9ashi/qa-portfolio-ticket-system.git
+cd qa-portfolio-ticket-system
 python -m venv .venv
 ```
 
