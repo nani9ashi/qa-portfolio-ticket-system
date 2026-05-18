@@ -43,7 +43,7 @@ python manage.py migrate
 python manage.py seed_demo
 ```
 
-`seed_demo` で以下のテスト用ユーザーが作成されます（共通パスワード：`pass1234`）：
+本書は **`seed_demo` によるデモユーザー（共通パスワード：`pass1234`）の正本** です。app/README §4 はここを参照します。
 
 | ロール | ユーザー名 |
 |---|---|
@@ -51,11 +51,9 @@ python manage.py seed_demo
 | Agent | `agent1`, `agent2` |
 | Admin | `admin1` |
 
-詳細は [app/README §4](./app/README.md#4-デモユーザーseed_demo) を参照。
-
 ## 4. アプリ起動とテスト実行（2ターミナル）
 
-**必ず「2つのターミナル」** を使い、両方で仮想環境を有効にしてください。
+2 つのターミナルを開き、両方で仮想環境を有効化して以下を実行します。
 
 | 手順 | **ターミナル1（サーバー起動）** | **ターミナル2（テスト実行）** |
 |---|---|---|
@@ -63,7 +61,7 @@ python manage.py seed_demo
 | 2. 仮想環境を有効化 | OS別コマンド（§1 参照） | OS別コマンド（§1 参照） |
 | 3. 実行 | `cd app`<br>`python manage.py runserver` | `cd qa/automation`<br>`python -m pytest --headed` |
 
-> ターミナル2を実行する前に、ターミナル1で `Starting development server at http://127.0.0.1:8000/` の表示を確認してください。
+> ターミナル2 は、ターミナル1 で `Starting development server at http://127.0.0.1:8000/` が表示されてから起動してください。
 
 ## 5. テスト実行オプション
 

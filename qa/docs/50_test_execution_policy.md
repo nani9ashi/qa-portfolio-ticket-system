@@ -114,7 +114,7 @@
 ※重要度と優先度は必ずしも一致しない（例：Criticalでも実験用欠陥で優先度を下げる等）。ただしその場合は欠陥ログの備考に理由を記録する。
 
 ### 5.4 テストケースの優先度（P1/P2）
-テストケースの「優先順位」は以下に統一する。
+本節は **TC優先度（P1/P2）の正本** である。20_conditions §3 は本節を参照する。
 
 | 優先順位 | 定義（目安） |
 | --- | --- |
@@ -126,25 +126,10 @@
 - 1セルに複数証跡を記録する場合は `;` 区切りで列挙する。
 - 証跡ファイル名は原則としてテスト結果ID（TR）を主キーとし、複数ある場合は連番を付ける（例：`TR-0002_01.png`）。
 
-### 5.6 ID採番のルール（REQ / TCND / TC / TR / DEFECT）
-本プロジェクトで扱うIDは、以下の命名規則に統一する。
+### 5.6 ID採番のルール
 
-- 要件ID（Requirements）：`REQ-001` から連番（正本：[要件仕様](../requirements/requirements.csv)）
-- テスト条件ID（Test Conditions）：`TCND-001` から連番（正本：[テスト条件](20_test_conditions.md)）
-- テストケースID（Test Cases）：`TC-001` から連番（正本：[テストケース](../testcases/testcases.csv)）
-- リスクID(Risk)：`R-XX`から連番（正本：[テスト計画書](10_test_plan.md)）
-- テスト結果ID（Test Results）：`TR-0001` から連番（正本：[テスト結果](../results/test_results.csv)）
-- 欠陥ID（Defects）：`DEFECT-001` から連番（正本：[欠陥ログ](../defects/defect_log.csv)）
+ID体系（REQ / TCND / TC / R / TR / DEFECT）の定義と運用ルールは [70_requirements_test_traceability.md §3](70_requirements_test_traceability.md#3-id体系採番) を参照。
 
-運用ルール：
-- 連番は欠番があってもよいが、**再利用しない**
-- 参照は原則として上位→下位（例：`REQ-001 → TCND-013 → TC-020`）で追跡できること
+## 6. CI環境でのテスト自動実行
 
-## 6.CI環境でのテスト自動実行
-
-GitHub Actionsを利用し、コードの変更ごとに以下のステップを自動実行する。
-
-1. テスト用DBのクリーンアップとシードデータ投入。
-2. Django開発サーバーのバックグラウンド起動。
-3. Playwrightによるブラウザテストの実行。
-4. 実行証跡（スクショ）のアーティファクト保存。
+CI実行プロセスの詳細は [40_test_environment.md §3.2](40_test_environment.md#32-ciパイプライン環境) を参照。

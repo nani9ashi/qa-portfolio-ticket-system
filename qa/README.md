@@ -7,78 +7,63 @@
 
 ```text
 qa/
-├── docs/                # テストドキュメント (JSTQB準拠)
-│   ├── 00_project_overview.md       # プロジェクト概要
-│   ├── 10_test_plan.md              # テスト計画書
-│   ├── 20_test_conditions.md        # テスト条件
-│   ├── 30_test_design.md            # テスト設計書
-│   └── ...                          # テスト完了レポート、トレーサビリティ等
-├── automation/          # テスト自動化 (Playwright/pytest)
+├── docs/                # テストドキュメント (JSTQB準拠：10計画→20条件→30設計→40環境→50実行→60完了→70トレーサビリティ)
+├── automation/          # テスト自動化 (Playwright/pytest、4シナリオ)
 ├── requirements/        # 要求仕様 (CSV形式)
-├── testcases/           # テストケース定義
-├── results/             # テスト実行結果
-├── defects/             # 欠陥管理 (ログおよび詳細レポート)
+├── testcases/           # テストケース定義 (CSV)
+├── results/             # テスト実行結果 (CSV、1実行=1行で追記)
+├── defects/             # 欠陥管理 (ログCSV + 詳細レポート)
 └── evidence/            # 実行証跡 (スクショ・動画・ログ)
 ```
 
 ## 主要ドキュメント・リンク
 
-### テスト計画・設計ドキュメント一覧
-- [プロジェクト概要](./docs/00_project_overview.md)
-- [テスト計画書](./docs/10_test_plan.md)
-- [テスト条件](./docs/20_test_conditions.md)
-- [テスト設計](./docs/30_test_design.md)
+### テスト計画〜完了レポート
+- [10 テスト計画書](./docs/10_test_plan.md)
+- [20 テスト条件](./docs/20_test_conditions.md)
+- [30 テスト設計](./docs/30_test_design.md)
+- [40 テスト環境定義](./docs/40_test_environment.md)
+- [50 テスト実行方針](./docs/50_test_execution_policy.md)
+- [60 テスト完了レポート](./docs/60_test_completion_report.md)
+- [70 要件とテストのトレーサビリティ](./docs/70_requirements_test_traceability.md)
 
-### テストケース・実行結果
-- [テストケース](./testcases/testcases.csv)
-- [テスト結果](./results/test_results.csv)
-
-### 要件トレーサビリティ
+### CSV・証跡
 - [要求仕様](./requirements/requirements.csv)
-- [要件とテストのトレーサビリティ](./docs/70_requirements_test_traceability.md)
+- [テストケース](./testcases/testcases.csv) ※設計情報のみ、実行列は持たない
+- [テスト結果](./results/test_results.csv) ※1実行=1行で追記
+- [欠陥ログ](./defects/defect_log.csv) ※1欠陥=1行
+- [スクリーンショット証跡](./evidence/screenshots/)
+- [自動化ログ](./evidence/auto/)
+
 ### 欠陥レポート
 - [DEFECT-001（IDOR：依頼者が他人チケット詳細を閲覧できた）](./defects/reports/DEFECT-001.md)
-- [DEFECT-002（body max_length が実装で enforce されていなかった／自動化Auto-03が検出）](./defects/reports/DEFECT-002.md)
-- [欠陥ログ](./defects/defect_log.csv)
+- [DEFECT-002（body max_length 未実装／自動化Auto-03 が検出）](./defects/reports/DEFECT-002.md)
 
-### プロジェクトトップ（全体概要）
+### プロジェクトトップ
 - [root README](../README.md)
 
-## 🛠 QAプロセスと取り組み
+## このディレクトリの読み方
 
-本プロジェクトでは、以下の品質保証活動を実践しています。
+1. [要求仕様](./requirements/requirements.csv) でテストベースを確認
+2. [10 テスト計画書](./docs/10_test_plan.md) で方針・スコープ・リスクを把握
+3. [20 テスト条件](./docs/20_test_conditions.md) と [テストケース](./testcases/testcases.csv) でケース展開を確認
+4. [テスト結果](./results/test_results.csv) と [欠陥ログ](./defects/defect_log.csv) で実行結果と欠陥管理を確認
+5. [60 テスト完了レポート](./docs/60_test_completion_report.md) で残存リスク・教訓・次アクションを確認
 
-### 1. 要件トレーサビリティの確保
-[要求仕様](./requirements/requirements.csv)から[テストケース](./testcases/testcases.csv)への紐付けを行い、テストカバレッジを可視化しています。
+## テスト自動化（Test Automation）
 
-### 2. テスト自動化（Shift Left）
-Playwright を用いたE2E自動テストを構築し、GitHub Actions によるCIに組み込む前提で設計しています。
+E2E自動テスト 4シナリオを **セキュリティ／バリデーション／認可／ハッピーパス** の4観点に分散して運用しています。実装上の工夫・検出効果（DEFECT-002 を自動化が検出した事例を含む）は [60 テスト完了レポート §11](./docs/60_test_completion_report.md#11-付記テスト自動化の実施結果-automated-test-summary) を参照。
 
-### 3. 欠陥管理の徹底
-検出されたバグは `defects/` 内で形式化して管理し、原因分析と再テストの結果までを記録します。
-
-## テスト自動化（Test Automation Strategy）
-
-本プロジェクトでは、品質保証の効率化と早期バグ発見（Shift Left）のため、E2E自動テストを戦略的に導入しています。現状 **4シナリオ** を運用中で、ハッピーパス／セキュリティ／バリデーション／認可 の4観点に分散させています。
-
-### 自動化の狙い
-- **品質ゲートの構築**: GitHub Actionsと連携し、テストをパスしないコードのマージを防止。
-- **クロスブラウザ/ロールテスト**: 複数の権限（Admin/Agent/Requester）を跨ぐ複雑な認可ロジックを自動で検証。
-- **エビデンスの自動取得**: 失敗時のスクリーンショット保存により、バグ再現の手間を大幅に削減。
-
-### 自動化シナリオ一覧（4本）
+### 自動化シナリオ一覧
 - **Auto-01**：Requester による作成→確認のハッピーパス（TC-032 & TC-001）
 - **Auto-02**：IDOR回帰（TC-002 / DEFECT-001 由来、`INTENTIONAL_BUG_IDOR` 切替で失敗実演可）
 - **Auto-03**：本文4001文字のサーバ側拒否（TC-046）
 - **Auto-04**：非担当 Agent のステータス変更UI抑止（TC-007 のUI側面）
 
-詳細は [60_test_completion_report.md §11](./docs/60_test_completion_report.md#11-付記テスト自動化の実施結果-automated-test-summary) を参照してください。
-
 ### 技術スタック
 - **Framework**: Playwright (Python)
 - **Test Runner**: pytest（共通 fixture は `automation/conftest.py` に集約）
 - **CI**: GitHub Actions
----
 
 ## 自動テストの実行方法
 

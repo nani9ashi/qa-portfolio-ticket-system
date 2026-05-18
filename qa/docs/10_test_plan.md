@@ -50,46 +50,13 @@
 - 入力制約（必須、文字数、添付サイズなど）
 - 権限マトリクス（ロール×操作）
 
-## 4. MVP要件
+## 4. MVP要件（テスト観点）
 
-MVP要件仕様の正本は [../requirements/requirements.csv](../requirements/requirements.csv) とする。
-本章は、テスト観点の理解を助けるための要約である。
+要件仕様の正本は [../requirements/requirements.csv](../requirements/requirements.csv)、ロール権限マトリクスは [../../app/README.md §5](../../app/README.md#5-ロールと権限仕様rbac)、状態遷移ルートは [../../app/README.md §6](../../app/README.md#6-ステータス遷移仕様state-machine) を参照。本書では再録せず、テスト観点として以下を重視する。
 
-### 4.1 ロールと権限
-- Requester（依頼者）
-  - 自分のチケットのみ：作成・閲覧・コメント可
-  - 更新（ステータス／担当／期限／添付の変更）は不可
-- Agent（担当者）
-  - 全チケット閲覧可
-  - **担当チケットのみ**：ステータス変更・コメント可
-  - 担当割当／期限変更は不可
-- Admin（管理者）
-  - 全チケット閲覧・更新可
-  - 担当割当、期限設定／変更可
-
-### 4.2 共通ルール
-- ログイン必須
-- 主要操作は監査ログ（履歴）として残す
-  - 作成／更新／ステータス変更／担当割当／期限変更／コメント追加 等
-- 添付は作成時のみ
-  - 差し替え／削除不可
-  - 1ファイル
-  - 拡張子・サイズ制限あり（詳細は要件CSVを正とする）
-
-### 4.3 状態遷移
-許可：
-- Open → In Progress / Pending
-- In Progress → Resolved / Pending
-- Pending → In Progress
-- Resolved → Closed
-
-禁止：
-- Open → Closed
-- Closed →（いかなる遷移も）禁止
-
-運用固定：
-- ステータス変更は Agent（担当のみ）または Admin のみ
-- 担当未割当のチケットは Agent がステータス変更できない（Adminが割当してから）
+- **認可**：ロール × 操作 × フィールドの組合せ（特に Requester ↔ Agent 間の越境、Closed 操作）
+- **状態遷移**：禁止遷移（Open→Closed、Closed→任意）、担当未割当時の Agent 制約、二重送信時の整合
+- **共通ルール**：ログイン必須、主要操作の監査ログ、添付の作成時制約（1ファイル・拡張子・サイズ）
 
 ## 5. スコープ
 
@@ -198,15 +165,7 @@ MVP要件仕様の正本は [../requirements/requirements.csv](../requirements/r
 
 ## 9. テスト環境とテストデータ
 
-### 9.1 テスト環境
-- ローカル起動：Docker Compose
-- ブラウザ：Chrome / Edge（任意でFirefox）
-- 証跡：スクリーンショット、必要に応じて短い録画
-
-### 9.2 テストデータ（例）
-- アカウント：Requester/Agent/Admin を各1つ以上
-- チケット：未対応・対応中・保留・解決・クローズを各数件
-- 検索用データ：カテゴリ違い、期限切れ、担当者別など
+テスト環境（OS/ブラウザ/CI）とテストアカウントは [40_test_environment.md](40_test_environment.md) を正本とする。本書からは参照に留める。
 
 ## 10. 欠陥管理
 
@@ -224,12 +183,5 @@ MVP要件仕様の正本は [../requirements/requirements.csv](../requirements/r
 
 ## 12. モニタリングとコントロール
 
-### 12.1 収集するメトリクス（例）
-- 計画/実行/未実行の件数
-- Pass/Fail/Blocked
-- 重要度別の欠陥件数
-- 優先リスク領域のカバレッジ（R-01〜R-03）
-
-### 12.2 レポート
-- テスト進捗レポート：節目で更新（簡易でも可）
-- テスト完了レポート：終了基準到達時に作成
+- 収集メトリクス：実行件数、Pass/Fail/Blocked、重要度別欠陥件数、優先リスク領域（R-01〜R-03）のカバレッジ
+- レポート：節目で進捗を更新し、終了基準到達時に [60_test_completion_report.md](60_test_completion_report.md) を作成

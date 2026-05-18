@@ -20,10 +20,8 @@ QA成果物に落とし込みやすい題材として、業務アプリの品質
 - **制限**: 添付ファイルは作成時のみ（1ファイル、拡張子／サイズ制限あり）
 
 ## 2. 技術スタック
-- **Language**: Python 3.12
-- **Framework**: Django 6.0
-- **Database**: SQLite（開発用・ファイルベースDB）
-- **Auth**: Django標準認証（セッションベース）
+
+技術スタックの正本は [root README §技術スタック](../README.md#技術スタック)。本アプリ固有の選定は **Database: SQLite**（開発用・ファイルベースDB）、**Auth: Django 標準認証**（セッションベース）。
 
 ## 3. セットアップ
 
@@ -35,14 +33,7 @@ QA成果物に落とし込みやすい題材として、業務アプリの品質
 
 ## 4. デモユーザー（seed_demo）
 
-`python manage.py seed_demo` コマンドで以下のテスト用ユーザーが作成されます。  
-全ユーザーの共通パスワード：`pass1234`
-
-| ロール | ユーザー名（ログインID） |
-| --- | --- |
-| Requester（依頼者） | `requester1`, `requester2` |
-| Agent（担当者） | `agent1`, `agent2` |
-| Admin（管理者） | `admin1` |
+`python manage.py seed_demo` で作成されるテスト用ユーザー（共通パスワード `pass1234`）の一覧は [../SETUP.md §3](../SETUP.md#3-db-初期化とデモデータ投入) を参照。
 
 ## 5. ロールと権限仕様（RBAC）
 
@@ -57,7 +48,7 @@ QA成果物に落とし込みやすい題材として、業務アプリの品質
 | 担当割当 | × | × | ○ |
 | 期限変更 | × | × | ○ |
 
-> **「作成」のロール設計について**：本MVPは **起票責務をRequesterに集約する設計判断** を採用しています。Agent（RQ-013, Must）と Admin（RQ-014, Should）はいずれも作成不可。理由は ①**責務分離の徹底**、②**起票の真正性（誰が報告したかの監査性）の担保**。Adminも対象外としたのは Should 要件を意図的に B 分類（対象外）として確定する判断によるもので、代理起票の需要が出た場合は Admin に権限を付与するのではなく **『代理起票ロール』を別建て** する方が責務分離として明確という設計思想です。詳細は [要件とテストのトレーサビリティ](../qa/docs/70_requirements_test_traceability.md) §8 参照。
+> **「作成」のロール設計**：Agent（RQ-013, Must）と Admin（RQ-014, Should）はいずれも作成不可。**起票責務を Requester に集約する設計判断**（責務分離・起票の真正性確保）。RQ-014 を B 確定（対象外）とした経緯・代理起票案の検討は [qa/docs/70 §8](../qa/docs/70_requirements_test_traceability.md#8-backlog未カバー一部の解消候補) を参照。
 
 ## 6. ステータス遷移仕様（State Machine）
 
@@ -95,19 +86,12 @@ MVPでは主に以下の操作を記録します。
 
 ## 9. テスト用の意図的欠陥（Bug Switch）
 
-本アプリには、QA検証（探索的テストや自動テストのフェイル確認）の題材として、**意図的欠陥を再現するスイッチ**を実装しています。
+QA検証（探索的テストや自動テストのフェイル実演）の題材として、`config/settings.py` に **`INTENTIONAL_BUG_IDOR`** スイッチを実装。
 
-### INTENTIONAL_BUG_IDOR
-認可制御の不備（IDOR: Insecure Direct Object Reference）をシミュレートします。
+- **True**：Requester が他人チケットを閲覧可能になる脆弱状態（IDOR: Insecure Direct Object Reference）を再現
+- **False（既定）**：正常な認可（Requester は自分のチケットのみ閲覧可）
 
-- **True の場合**: 閲覧認可が崩れ、RequesterがURLを直接指定するなどで「他人のチケットを閲覧できる」脆弱な状態を再現
-- **False の場合**: 正常な認可（Requesterは自分のチケットのみ閲覧可能）
-
-設定箇所（`config/settings.py`）：
-```python
-# 脆弱性テストを行う場合は True に変更してください
-INTENTIONAL_BUG_IDOR = False
-```
+QA 運用での扱い（テスト時の ON/OFF 記録ルール、自動化での Fail 実演手順）は [qa/docs/40_test_environment.md §6](../qa/docs/40_test_environment.md#6-意図的欠陥検出修正の題材) と [qa/docs/60_test_completion_report.md §11.3](../qa/docs/60_test_completion_report.md#113-検出能力の実演手順idor回帰) を参照。
 
 ## 10. 関連リソース
 - **QA統合成果物**: [qa/README](../qa/README.md)
