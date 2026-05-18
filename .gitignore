@@ -17,6 +17,9 @@ local_settings.py
 # VS Code
 .vscode/
 
+# Claude Code worktrees / session metadata
+.claude/
+
 # OS
 .DS_Store
 Thumbs.db
