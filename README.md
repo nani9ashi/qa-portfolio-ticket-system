@@ -77,19 +77,19 @@ Vモデルを意識し、要求分析から完了報告までを一貫してド�
 
 以下は CI Artifacts から取得した実際のスクリーンショットです。
 
-**Auto-04 — 非担当Agentの認可UI抑止**
-
-![Auto-04: 非担当AgentはステータスUIを操作できない](./qa/docs/images/auto-04_agent_no_status_ui.png)
-
-agent2 が非担当チケット（agent1割当）を開くと、Status Transition は「Not allowed to change status.」のみで `<select>` が描画されない。Comments / History は閲覧可能 —「**見えるが触れない**」というRBACの繊細な挙動が一枚で伝わる。
-
 **Auto-03 — DEFECT-002 修正後の本文バリデーション**
 
 ![Auto-03: 本文4001文字のサーバ側拒否](./qa/docs/images/auto-03_body_validation_error.png)
 
 本文4001文字での作成試行に対し、`Ensure this value has at most 4000 characters (it has 4001).` を表示して拒否。本シナリオの実装中に **[DEFECT-002](./qa/defects/reports/DEFECT-002.md)（body max_length 未実装）** を検出・修正・回帰確認した。
 
-### 3. "Shift Left" を意識した構成
+**Auto-04 — 非担当Agentの認可UI抑止**
+
+![Auto-04: 非担当AgentはステータスUIを操作できない](./qa/docs/images/auto-04_agent_no_status_ui.png)
+
+agent2 が非担当チケット（agent1割当）を開くと、Status Transition は「Not allowed to change status.」のみで `<select>` が描画されない。「**見えるが操作できない**」というRBACの正常な挙動を確認。
+
+### 3. シフトレフトを意識した構成
 開発コード（`app`）とテストコード（`qa`）を同一リポジトリで管理することで、開発サイクルの中に品質保証プロセスを組み込んでいます。
 
 ## 本ポートフォリオの範囲
@@ -97,8 +97,7 @@ agent2 が非担当チケット（agent1割当）を開くと、Status Transitio
 テスト計画における「説明責任」を意識し、**意図的にスコープ外とした項目** を以下に明示します。やらない理由を残すこと自体も品質活動の一部だと考えています。
 
 - **単体テスト（Unit Test）**：本MVPでは E2E（システムテスト）に集約し、`models.py` 等の単体テストは未整備としています。SUT が小規模でビジネスロジックが画面側に集約されること、および学習段階としては E2E で得られる手戻りシグナルを優先したいことが理由です。今後の拡張で `pytest` ベースの単体テスト追加を Backlog としています。
-- **負荷・性能試験**：MVP の対象外。
-- **専門的な脆弱性診断（侵入テスト等）**：MVP の対象外。代わりに、意図的欠陥（IDOR）の起票→修正→回帰のフローでセキュリティ観点の取り扱いを表現しています。
+- **専門的な脆弱性診断（侵入テスト等）**：QA 活動対象外。簡易的な脆弱性のチェックを、意図的欠陥（IDOR）の起票→修正→回帰のフローで表現しています。
 
 未カバー要件の扱いについては、[要件とテストのトレーサビリティ](./qa/docs/70_requirements_test_traceability.md) で A（追加してカバー）／ B（スコープ外）／ C（要件を修正・明確化）に分類して管理しています。
 
