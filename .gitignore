@@ -14,6 +14,13 @@ local_settings.py
 /qa/results/
 .pytest_cache/
 
+# runn (API test layer) — CI / local generated artifacts（runbook 本体は qa/api/runn/ で追跡する）
+/qa/api/runn_result.txt
+/qa/api/runn_capture/
+/runn
+/runn.exe
+/runn.tar.gz
+
 # VS Code
 .vscode/
 

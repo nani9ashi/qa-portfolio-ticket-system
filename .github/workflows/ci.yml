@@ -73,3 +73,57 @@ jobs:
         with:
           name: e2e-evidence
           path: qa/automation/evidence/auto/
+
+  # API/インテグレーションテスト層（runn）。E2E とは独立した並列ジョブ。
+  # 高速・決定的なので毎 push で実行する（テストピラミッド最適化）。
+  api-test:
+    name: API Test (runn)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 再現性のため runn のバージョンは固定する。
+      - name: Install runn (pinned v1.9.2)
+        run: |
+          curl -sL https://github.com/k1LoW/runn/releases/download/v1.9.2/runn_v1.9.2_linux_amd64.tar.gz -o runn.tar.gz
+          tar xzf runn.tar.gz runn
+          sudo mv runn /usr/local/bin/runn
+          runn --version
+
+      - name: Prepare Database
+        env:
+          SECRET_KEY: "django-insecure-test-key-do-not-use-in-production"
+        run: |
+          cd app
+          python manage.py migrate
+          python manage.py seed_demo
+
+      - name: Run Server and API Tests (runn)
+        env:
+          SECRET_KEY: "django-insecure-test-key-do-not-use-in-production"
+        run: |
+          cd app
+          python manage.py runserver 127.0.0.1:8000 &
+          sleep 5
+          cd ..
+          # runbook は自前でトークン取得＋データ生成するため seed_demo の既知ユーザーのみに依存。
+          runn run "qa/api/runn/**/*.yml" --verbose < /dev/null | tee qa/api/runn_result.txt
+
+      - name: Upload runn result
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: api-runn-result
+          path: qa/api/runn_result.txt
