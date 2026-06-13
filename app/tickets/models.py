@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxLengthValidator
 from django.db import models
 from django.utils import timezone
+from datetime import date
 import os
 
 class TicketStatus(models.TextChoices):
@@ -61,7 +62,10 @@ class Ticket(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def clean(self):
-        if self.due_date is not None and self.due_date < timezone.localdate():
+        # DEFECT-003: due_date が未コード化（不正フォーマット等で clean_fields のコーシングに
+        # 失敗）でも str < date の TypeError(500) を起こさないよう、date 型のときだけ判定する。
+        # 不正フォーマット自体は clean_fields 側が ValidationError として full_clean に集約する。
+        if isinstance(self.due_date, date) and self.due_date < timezone.localdate():
             raise ValidationError({"due_date": "Due date cannot be in the past."})
 
     def can_transition_to(self, new_status: str) -> bool:

@@ -2,6 +2,10 @@
 {% block content %}
 <h2>Ticket #{{ ticket.id }}</h2>
 
+{% if error %}
+  <p style="color:red;">{{ error }}</p>
+{% endif %}
+
 <table border="1" cellpadding="6" cellspacing="0">
   <tr><th>Title</th><td>{{ ticket.title }}</td></tr>
   <tr><th>Status</th><td>{{ ticket.get_status_display }} ({{ ticket.status }})</td></tr>

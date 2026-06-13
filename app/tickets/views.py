@@ -1,39 +1,24 @@
 ﻿from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
-from django.conf import settings
+
 from .models import Ticket, Comment, TicketHistory, TicketStatus
-
-def role_of(user):
-    names = set(user.groups.values_list("name", flat=True))
-    if "Admin" in names:
-        return "Admin"
-    if "Agent" in names:
-        return "Agent"
-    return "Requester"
-
-def is_agent_user(user: User) -> bool:
-    return user.groups.filter(name="Agent").exists()
-
-def can_view(user, ticket: Ticket) -> bool:
-    if getattr(settings, "INTENTIONAL_BUG_IDOR", False):
-        return True
-
-    r = role_of(user)
-    if r in ("Admin", "Agent"):
-        return True
-    return ticket.requester_id == user.id
-
-def can_update_status(user, ticket: Ticket) -> bool:
-    r = role_of(user)
-    if r == "Admin":
-        return True
-    if r == "Agent" and ticket.assignee_id == user.id:
-        return True
-    return False
+# 認可・状態遷移のルールは policy.py に一本化し、HTML ビューと JSON API で共有する。
+# （role_of / can_view 等はここから再エクスポートされるので既存の参照名は不変）
+from .policy import (
+    role_of,
+    is_agent_user,
+    can_view,
+    can_update_status,
+    can_create,
+    can_assign,
+    can_change_due,
+    can_comment,
+    check_status_change,
+)
 
 @login_required
 def ticket_list(request):
@@ -60,27 +45,28 @@ def ticket_list(request):
         "statuses": TicketStatus.choices,
     })
 
+def _detail_context(request, ticket, error=None):
+    """詳細画面のコンテキスト（ticket_detail と期日エラー再描画で共有）。"""
+    return {
+        "ticket": ticket,
+        "role": role_of(request.user),
+        "next_candidates": [s for s in TicketStatus.values if ticket.can_transition_to(s)],
+        "agents": User.objects.filter(groups__name="Agent").order_by("username"),
+        "can_update_status": can_update_status(request.user, ticket),
+        "error": error,
+    }
+
+
 @login_required
 def ticket_detail(request, pk):
     ticket = get_object_or_404(Ticket, pk=pk)
     if not can_view(request.user, ticket):
         return HttpResponseForbidden("forbidden")
-
-    r = role_of(request.user)
-    next_candidates = [s for s in TicketStatus.values if ticket.can_transition_to(s)]
-    agents = User.objects.filter(groups__name="Agent").order_by("username")
-
-    return render(request, "tickets/detail.html", {
-        "ticket": ticket,
-        "role": r,
-        "next_candidates": next_candidates,
-        "agents": agents,
-        "can_update_status": can_update_status(request.user, ticket),
-    })
+    return render(request, "tickets/detail.html", _detail_context(request, ticket))
 
 @login_required
 def ticket_create(request):
-    if role_of(request.user) != "Requester":
+    if not can_create(request.user):
         return HttpResponseForbidden("forbidden")
 
     if request.method == "POST":
@@ -119,18 +105,11 @@ def ticket_change_status(request, pk):
     if request.method != "POST":
         return HttpResponseForbidden("POST only")
 
-    if role_of(request.user) == "Agent" and ticket.assignee_id is None:
-        return HttpResponseForbidden("unassigned ticket cannot be updated by agent")
-
-    if not can_update_status(request.user, ticket):
-        return HttpResponseForbidden("forbidden")
-
     new_status = request.POST.get("status")
-    if new_status not in TicketStatus.values:
-        return HttpResponseForbidden("invalid")
-
-    if not ticket.can_transition_to(new_status):
-        return HttpResponseForbidden("invalid transition")
+    # 未割当ガード→更新認可→値妥当性→遷移妥当性を policy 側で多段判定（順序・文言は不変）。
+    ok, reason = check_status_change(request.user, ticket, new_status)
+    if not ok:
+        return HttpResponseForbidden(reason)
 
     old = ticket.status
     ticket.status = new_status
@@ -148,7 +127,7 @@ def ticket_change_status(request, pk):
 @login_required
 def ticket_assign(request, pk):
     ticket = get_object_or_404(Ticket, pk=pk)
-    if role_of(request.user) != "Admin":
+    if not can_assign(request.user):
         return HttpResponseForbidden("forbidden")
     if request.method != "POST":
         return HttpResponseForbidden("POST only")
@@ -185,7 +164,7 @@ def ticket_assign(request, pk):
 @login_required
 def ticket_add_comment(request, pk):
     ticket = get_object_or_404(Ticket, pk=pk)
-    if not can_view(request.user, ticket):
+    if not can_comment(request.user, ticket):
         return HttpResponseForbidden("forbidden")
     if request.method != "POST":
         return HttpResponseForbidden("POST only")
@@ -205,7 +184,7 @@ def ticket_add_comment(request, pk):
 @login_required
 def ticket_change_due_date(request, pk):
     ticket = get_object_or_404(Ticket, pk=pk)
-    if role_of(request.user) != "Admin":
+    if not can_change_due(request.user):
         return HttpResponseForbidden("forbidden")
     if request.method != "POST":
         return HttpResponseForbidden("POST only")
@@ -217,7 +196,15 @@ def ticket_change_due_date(request, pk):
         ticket.due_date = None
     else:
         ticket.due_date = due
-        ticket.full_clean()
+        try:
+            ticket.full_clean()
+        except ValidationError as e:
+            # DEFECT-003 修正: 過去日/不正値は未処理例外（500）ではなく、
+            # 作成画面と同様に詳細画面でエラー表示して graceful に拒否する。
+            return render(
+                request, "tickets/detail.html",
+                _detail_context(request, ticket, error=str(e)),
+            )
 
     ticket.save(update_fields=["due_date", "updated_at"])
 
