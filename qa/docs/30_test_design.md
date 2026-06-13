@@ -1,9 +1,9 @@
 # テスト設計 - チケット管理アプリ
 
 - 文書ID：TD-TICKET-001
-- 版：v1.5
+- 版：v1.6
 - ステータス：Approved
-- 最終更新日：2026-05-10
+- 最終更新日：2026-06-13
 - 作成者：仁後慎太郎
 - 対象：チケット管理アプリ（Web, Django + SQLite）
 - 関連：
@@ -44,6 +44,7 @@ stateDiagram-v2
 - Create は Requester が実行可能（Admin作成は Should 要件として Backlog 管理）
 - Update（ステータス変更）は Admin または担当Agent が実行可能
 - 本ポートフォリオでは **0-switch（単一遷移）カバレッジ** を採用する。1-switch 以上（2連続遷移）は組合せ爆発を考慮しスコープ外とした。Closed は事実上の終了状態として扱う。
+- **（v1.6）本状態遷移モデル（許可/禁止エッジ）と §3.2 のデシジョンテーブル R1-R6 は、runn API 層（API-B：valid_edges / invalid_transitions / role_constraints）で網羅的に検証している。層の判断は [80 テスト層戦略](80_test_layer_strategy.md)。**
 
 ### 3.2 権限マトリクス（Decision Table — ステータス変更操作の認可）
 
@@ -100,6 +101,7 @@ stateDiagram-v2
 - title／body の「無効下限=0文字」は **必須エラー（同値クラス：未入力）** として TC-033 で集約検証している。
 - due_date の上限は仕様上未定義（運用上は任意）。
 - 添付サイズの「無効下限」は実装上発生し得ない（0Bファイル＝アップロード不成立）ため対象外とした。
+- **（v1.6）title/body の4点境界は runn API 層（API-C：title_body_boundary）、due_date の過去日/不正値は API-C（due_date）で検証している。添付の境界は API テスト対象外（E2E/手動に残置）。**
 
 ## 4. カバレッジアイテム（Coverage Items）
 

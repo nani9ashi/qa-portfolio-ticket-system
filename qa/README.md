@@ -7,8 +7,9 @@
 
 ```text
 qa/
-├── docs/                # テストドキュメント (JSTQB準拠：10計画→20条件→30設計→40環境→50実行→60完了→70トレーサビリティ)
-├── automation/          # テスト自動化 (Playwright/pytest、4シナリオ)
+├── docs/                # テストドキュメント (JSTQB準拠：10計画→…→70トレーサビリティ→80テスト層戦略)
+├── api/                 # API/インテグレーションテスト (runn、10 runbook / 102 step)
+├── automation/          # E2E自動化 (Playwright/pytest、4シナリオ)
 ├── requirements/        # 要求仕様 (CSV形式)
 ├── testcases/           # テストケース定義 (CSV)
 ├── results/             # テスト実行結果 (CSV、1実行=1行で追記)
@@ -26,6 +27,8 @@ qa/
 - [50 テスト実行方針](./docs/50_test_execution_policy.md)
 - [60 テスト完了レポート](./docs/60_test_completion_report.md)
 - [70 要件とテストのトレーサビリティ](./docs/70_requirements_test_traceability.md)
+- [80 テスト層戦略（テストピラミッド最適化）](./docs/80_test_layer_strategy.md)
+- [API テスト層 README（runn）](./api/README.md)
 
 ### CSV・証跡
 - [要求仕様](./requirements/requirements.csv)
@@ -38,6 +41,7 @@ qa/
 ### 欠陥レポート
 - [DEFECT-001（IDOR：依頼者が他人チケット詳細を閲覧できた）](./defects/reports/DEFECT-001.md)
 - [DEFECT-002（body max_length 未実装／自動化Auto-03 が検出）](./defects/reports/DEFECT-002.md)
+- [DEFECT-003（期限の過去日で500／runn API 層の期待値設計が検出）](./defects/reports/DEFECT-003.md)
 
 ### プロジェクトトップ
 - [root README](../README.md)
@@ -52,18 +56,24 @@ qa/
 
 ## テスト自動化（Test Automation）
 
-E2E自動テスト 4シナリオを **セキュリティ／バリデーション／認可／ハッピーパス** の4観点に分散して運用しています。実装上の工夫・検出効果（DEFECT-002 を自動化が検出した事例を含む）は [60 テスト完了レポート §11](./docs/60_test_completion_report.md#11-付記テスト自動化の実施結果-automated-test-summary) を参照。
+テストピラミッド最適化により、自動テストを **2層** で運用しています（層の判断は [80 テスト層戦略](./docs/80_test_layer_strategy.md)）。
 
-### 自動化シナリオ一覧
+### API/インテグレーション層（runn・10 runbook / 102 step）
+認可（RBAC/IDOR）・状態遷移・入力検証の **組合せ網羅** を高速・決定的に検証します。実行手順・runbook 構成は [qa/api/README](./api/README.md)。
+
+### E2E 層（Playwright・4シナリオ／再配分後）
 - **Auto-01**：Requester による作成→確認のハッピーパス（TC-032 & TC-001）
-- **Auto-02**：IDOR回帰（TC-002 / DEFECT-001 由来、`INTENTIONAL_BUG_IDOR` 切替で失敗実演可）
-- **Auto-03**：本文4001文字のサーバ側拒否（TC-046）
-- **Auto-04**：非担当 Agent のステータス変更UI抑止（TC-007 のUI側面）
+- **Auto-02**：IDOR回帰スモーク（TC-002 / DEFECT-001 由来、`INTENTIONAL_BUG_IDOR` 切替で API/E2E 同時失敗を実演可）
+- **Auto-04**：非担当 Agent のステータス変更UI抑止（TC-007 のUI側面。サーバ側認可は runn へ移設）
+- **Auto-05**：期限の過去日で 500 にならず graceful 拒否（DEFECT-003 回帰）
+- ※旧 Auto-03（本文境界）は runn `validation/` へ移設し削除。
+
+実装上の工夫・検出効果（DEFECT-002/003 を自動化が検出した事例を含む）は [60 テスト完了レポート §11](./docs/60_test_completion_report.md#11-付記テスト自動化の実施結果-automated-test-summary) を参照。
 
 ### 技術スタック
-- **Framework**: Playwright (Python)
-- **Test Runner**: pytest（共通 fixture は `automation/conftest.py` に集約）
-- **CI**: GitHub Actions
+- **API Test**: runn (k1LoW) ※v1.9.2 固定 ／ 薄い JSON API は Django REST Framework（Token 認証）
+- **E2E Framework**: Playwright (Python) ／ **Runner**: pytest（共通 fixture は `automation/conftest.py` に集約）
+- **CI**: GitHub Actions（`api-test` と `e2e-test` を毎 push 並列実行）
 
 ## 自動テストの実行方法
 

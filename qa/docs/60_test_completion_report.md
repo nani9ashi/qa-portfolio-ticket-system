@@ -1,9 +1,9 @@
 # テスト完了レポート - チケット管理アプリ
 
 - 文書ID：TCR-TICKET-001
-- 版：v1.1
+- 版：v1.2
 - ステータス：Approved
-- 最終更新日：2026-05-10
+- 最終更新日：2026-06-13
 - 作成者：仁後慎太郎
 - 対象：チケット管理アプリ（Web, Django + SQLite）
 - 関連：
@@ -88,20 +88,22 @@
 [要件とテストのトレーサビリティ](70_requirements_test_traceability.md)
  の集計（全42件）。
 
-- カバー：30件
-- 一部カバー：7件
-- 未カバー：5件
+- カバー：37件
+- 一部カバー：3件
+- 未カバー：2件
 
 ### Must / Should の内訳
-- Must：39件（カバー29 / 一部7 / 未カバー3）
-- Should：3件（カバー1 / 一部0 / 未カバー2）
+- Must：39件（カバー35 / 一部3 / 未カバー1）
+- Should：3件（カバー2 / 一部0 / 未カバー1）
 
 未カバー要件（[トレーサビリティ](70_requirements_test_traceability.md)より）：
-- Must：RQ-024, RQ-028, RQ-032
-- Should：RQ-014, RQ-031
+- Must：RQ-024
+- Should：RQ-014（B 確定）
 
 一部カバー要件（[トレーサビリティ](70_requirements_test_traceability.md)より）：
-- RQ-002; RQ-004; RQ-005; RQ-006; RQ-008; RQ-027; RQ-029
+- RQ-002; RQ-008; RQ-029
+
+> v1.2：runn API/インテグレーション層の新設に伴い、RQ-005/006/027/028/031/032 をカバー化（カバレッジ集計は [70 v1.4](70_requirements_test_traceability.md) を正とする）。
 
 ## 6. 主要な欠陥と状況（定性）
 
@@ -111,6 +113,8 @@
   - 状況：意図的欠陥ビルドで再現（TR-0001/TR-0002）→ 修正後ビルドで回帰合格（TR-0003/TR-0004）→ 欠陥状態：検証済
 - DEFECT-002：本文(body)の最大長制約が実装でenforceされていない（Severity：High / Priority：High、v1.1で追記）
   - 状況：自動化シナリオ Auto-03（TC-046 由来）の実装中に検出。`Ticket.body` フィールドへ明示的に `MaxLengthValidator(4000)` を追加することで修正。Auto-03 を再実行して合格 → 欠陥状態：検証済。詳細は §11.4 と [DEFECT-002](../defects/reports/DEFECT-002.md) を参照。
+- DEFECT-003：期限変更で過去日入力時に 500 エラー（Severity：Medium / Priority：Medium、v1.2で追記）
+  - 状況：**runn API 層の期待値設計（過去日 → 400）を書き下す過程で検出**した HTML 層の不具合。`ticket_change_due_date` が `full_clean()` を try/except 外で呼び（過去日で 500）、加えて `Ticket.clean()` が未コード化値で `TypeError`（不正フォーマットで 500）。view を try/except 化＋model を `isinstance` ガードで修正し、**Auto-05（HTML 回帰）** と runn `validation/due_date.yml`（API 400）で回帰確認 → 欠陥状態：検証済。詳細は §11.7 と [DEFECT-003](../defects/reports/DEFECT-003.md) を参照。
 
 ## 7. 残存リスク / 未完了事項（Backlogの扱い）
 
@@ -157,7 +161,7 @@ Backlog（A/B/C分類）の正本は [70_requirements_test_traceability.md §8](
 
 ## 11. 付記：テスト自動化の実施結果 (Automated Test Summary)
 
-本プロジェクトでは、CIパイプラインにおける品質ゲート（Build Verification）として、**「セキュリティ／バリデーション／認可」の3カテゴリ＋ハッピーパス** に分散した4シナリオを自動化している（v1.1 で1→4に拡張）。
+本プロジェクトでは、CIパイプラインの品質ゲートを **2層** で構成している：**(1) runn による API/インテグレーション層**（認可・状態遷移・入力検証の組合せ網羅）と、**(2) Playwright による E2E 層**（代表シナリオ）。v1.2 でテストピラミッド最適化を実施し、組合せ網羅を E2E から API 層へ再配分した（判断は [80](80_test_layer_strategy.md)）。本節の Auto-0x は E2E 層、API-x は runn 層を指す。
 
 ### 11.1 自動化スコープと選定理由
 代表的な業務フローと、QAリスク観点で重みのある領域（IDOR・境界値・RBAC）をバランスよくカバーすることで、CIで「動く仕様書」として機能させることを意図している。
@@ -165,9 +169,9 @@ Backlog（A/B/C分類）の正本は [70_requirements_test_traceability.md §8](
 | ID | 対応TC | カテゴリ | 自動化シナリオ名 | 検証内容（Assertion） |
 | :--- | :--- | :--- | :--- | :--- |
 | **Auto-01** | TC-032 & TC-001 | ハッピーパス | Requesterによるチケット作成と確認 | ログイン成功／新規チケットDB書き込み／詳細画面での入力値（Title/Body）完全一致 |
-| **Auto-02** | TC-002（RQ-015） | セキュリティ | Requesterは他人チケットURLを直叩きしても閲覧不可（IDOR回帰） | 他人チケット詳細URLが 403 を返す／本文がDOMに含まれない |
-| **Auto-03** | TC-046（RQ-004） | バリデーション | 本文4001文字はサーバ側で拒否される | URLが /tickets/new/ のまま遷移しない／赤色エラーメッセージが可視 |
-| **Auto-04** | TC-007（RQ-029） | 認可 | 非担当 Agent はステータス変更UIを操作できない | 閲覧は可能／"Not allowed to change status." が可視／`select[name='status']` が DOM に存在しない |
+| **Auto-02** | TC-002（RQ-015） | セキュリティ（認可スモーク） | Requesterは他人チケットURLを直叩きしても閲覧不可（IDOR回帰） | 他人チケット詳細URLが 403 を返す／本文がDOMに含まれない |
+| **Auto-04** | TC-007（RQ-029） | 認可（UI抑止） | 非担当 Agent はステータス変更UIを操作できない | "Not allowed to change status." が可視／`select[name='status']` が DOM に不在（サーバ側認可は API-B3 へ移設） |
+| **Auto-05** | TC-036（RQ-006）/ DEFECT-003 | 回帰（実欠陥） | 期限に過去日を入力しても 500 にならず graceful にエラー表示 | 詳細画面で赤エラーが可視／Traceback 非表示（API 期待値=400 は API-C2） |
 
 ### 11.2 実装の工夫（Engineering Highlights）
 - **セレクタの堅牢性**：UI変更に弱いラベル依存（`getByLabel`）を避け、Djangoフォームの不変属性である `name` 属性（`input[name='title']`等）を指定することで、テストの保守性を高めている。
@@ -211,8 +215,35 @@ GitHub Actionsを用いたCI環境におけるテスト実行結果、および�
 - **リスク低減**：DEFECT-001（IDOR）／DEFECT-002（body長制約） の再発を Auto-02／Auto-03 が即時検知する体制を構築。
 
 ### 11.6 今後の拡張計画（Backlog）
-現状は4シナリオ・単一ブラウザ構成。次の拡張候補：
-- **ページオブジェクト（POM）パターンの導入**：シナリオ数が10本を超える段階で導入を検討。
+- ~~**直叩きAPIテスト**：CSRF処理ヘルパーを整備し、サーバ側を自動化~~ → **✓ v1.2 で実現**（runn API 層・CSRF 不要の Token 認証 API。§11.7）。
+- **ページオブジェクト（POM）パターンの導入**：E2E シナリオが増えた段階で検討。
 - **ブラウザmatrix**：Firefox / WebKit 追加。
-- **直叩きAPIテスト**：CSRF処理ヘルパーを整備し、TC-007/TC-029 のサーバ側を自動化。
-- **並列実行**：`pytest-xdist` 導入（10シナリオ超で効果が明確になる規模）。
+- **並列実行**：runn の `--concurrent`、E2E の `pytest-xdist`。
+
+### 11.7 runn API/インテグレーションテスト層（新設・v1.2）
+
+テストピラミッド最適化（[80](80_test_layer_strategy.md)）に基づき、組合せが爆発する認可・状態遷移・入力検証を **高速・決定的な API 層へ押し下げた**。
+
+**規模**：10 runbook / 102 step（[API README](../api/README.md)）。
+
+| 区分 | runbook | 主な検証（一意な期待値） |
+| :--- | :--- | :--- |
+| **API-A** 認可+IDOR | idor / unauthenticated / view_authorization / create_authorization / assign_due_authorization | IDOR=403（DEFECT-001 の API 回帰）／未認証=401／一覧スコープ／作成は Requester のみ／割当・期限は Admin のみ |
+| **API-B** 状態遷移 | valid_edges / invalid_transitions / role_constraints | 許可6エッジ=200＋遷移後状態／禁止エッジ=409／不正値=400／R1-R6（デシジョンテーブル） |
+| **API-C** 入力検証 | title_body_boundary / due_date | title(80)/body(4000) の4点境界／過去日・不正値=400 |
+
+**E2E 再配分（before / after）**：
+
+| シナリオ | before | after |
+| :--- | :--- | :--- |
+| Auto-01 ハッピーパス | E2E | **KEEP**（E2E） |
+| Auto-02 IDOR | E2E | **KEEP**（認可スモーク。組合せ IDOR は API-A へ） |
+| Auto-03 本文境界 | E2E | **API層へ移設し削除**（API-C・4点境界へ拡張） |
+| Auto-04 非担当Agent | E2E | **KEEP**（UI 抑止のみ。サーバ側認可は API-B3 へ） |
+| Auto-05 期限回帰 | （無） | **新規**（DEFECT-003 の HTML 回帰） |
+
+**単一ソースの確認**：認可は [policy.py](../../app/tickets/policy.py) を HTML/API で共有。`INTENTIONAL_BUG_IDOR=True` にすると **API-A(idor) と Auto-02 が同時に・同一原因で失敗**する（§11.3 の検出能力実演を両層へ拡張）。
+
+**実行結果**：runn 10/10 scenario Pass（`INTENTIONAL_BUG_IDOR=False` 既定）。E2E 4/4 Pass。CI で `e2e-test` と `api-test` を毎 push 並列実行。
+
+**DEFECT-003（API 層が炙り出した実欠陥）**：API の期待値（過去日 → 400）を厳密に書き下す過程で、HTML の期限変更が過去日で 500 になる不具合を発見。起票 → 修正（view の try/except＋model の型ガード）→ 回帰（Auto-05／API-C2）まで完了。**下層で期待値を一意に書く作業そのものが、上層の取りこぼしを検出するレビュー機会になった**事例（DEFECT-001/002 に続く3例目）。
