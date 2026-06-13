@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "tickets",
 
+    # テスト容易性のための薄い JSON API 層（runn 用）。Session/CSRF は使わず Token 認証。
+    "rest_framework",
+    "rest_framework.authtoken",
 ]
 
 MIDDLEWARE = [
@@ -132,3 +135,19 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 
 INTENTIONAL_BUG_IDOR = False
+
+
+# --- Django REST Framework（テスト容易性のための薄い JSON API 層） ----------
+# 認証は Token のみ（SessionAuthentication は使わない＝CSRF 不要で runn から叩ける）。
+# 既定で IsAuthenticated（未認証は 401）。ブラウザブル API は無効化し JSON のみ返す。
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ],
+}

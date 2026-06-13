@@ -6,6 +6,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("django.contrib.auth.urls")),  # /accounts/login/
+    path("api/", include("tickets.api_urls")),  # テスト容易性のための薄い JSON API
     path("", include("tickets.urls")),
 ]
 
