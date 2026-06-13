@@ -1,0 +1,57 @@
+desc: "IDOR / 参照認可: 他ユーザーのチケットは参照できない（DEFECT-001 の API 回帰）"
+# 期待値は status で一意に書き下す（① の決定的な世界）。
+# settings.INTENTIONAL_BUG_IDOR=True にすると idor_denied が 200 になり失敗する＝
+# E2E(Auto-02) と同じ can_view を共有しているため、1スイッチで両層が同時に破綻する。
+runners:
+  req: "http://127.0.0.1:8000"
+vars:
+  password: pass1234
+steps:
+  login_req1:
+    desc: "requester1 のトークン取得"
+    req:
+      /api/auth/token/:
+        post:
+          body:
+            application/json:
+              username: requester1
+              password: "{{ vars.password }}"
+    test: current.res.status == 200
+  login_req2:
+    desc: "requester2 のトークン取得"
+    req:
+      /api/auth/token/:
+        post:
+          body:
+            application/json:
+              username: requester2
+              password: "{{ vars.password }}"
+    test: current.res.status == 200
+  create_target:
+    desc: "requester2 が自分のチケットを作成（IDOR の標的・所有者=requester2）"
+    req:
+      /api/tickets/:
+        post:
+          headers:
+            Authorization: "Token {{ steps.login_req2.res.body.token }}"
+          body:
+            application/json:
+              title: "req2 secret"
+              body: "only requester2 may read this"
+    test: current.res.status == 201
+  idor_denied:
+    desc: "requester1 は requester2 のチケットを参照できない（403）"
+    req:
+      /api/tickets/{{ steps.create_target.res.body.id }}/:
+        get:
+          headers:
+            Authorization: "Token {{ steps.login_req1.res.body.token }}"
+    test: current.res.status == 403
+  owner_allowed:
+    desc: "対照: 所有者 requester2 は自分のチケットを参照できる（200）"
+    req:
+      /api/tickets/{{ steps.create_target.res.body.id }}/:
+        get:
+          headers:
+            Authorization: "Token {{ steps.login_req2.res.body.token }}"
+    test: current.res.status == 200

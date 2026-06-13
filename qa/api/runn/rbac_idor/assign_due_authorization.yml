@@ -1,0 +1,104 @@
+desc: "割当・期限の認可: Admin のみ実行可。assignee は Agent 限定（RQ-007/027/028/030/031）"
+runners:
+  req: "http://127.0.0.1:8000"
+vars:
+  password: pass1234
+steps:
+  login_req1:
+    req:
+      /api/auth/token/:
+        post:
+          body: { application/json: { username: requester1, password: "{{ vars.password }}" } }
+    test: current.res.status == 200
+  login_agent1:
+    req:
+      /api/auth/token/:
+        post:
+          body: { application/json: { username: agent1, password: "{{ vars.password }}" } }
+    test: current.res.status == 200
+  login_agent2:
+    req:
+      /api/auth/token/:
+        post:
+          body: { application/json: { username: agent2, password: "{{ vars.password }}" } }
+    test: current.res.status == 200
+  login_admin:
+    req:
+      /api/auth/token/:
+        post:
+          body: { application/json: { username: admin1, password: "{{ vars.password }}" } }
+    test: current.res.status == 200
+  create_x:
+    desc: "requester1 がチケット作成（割当・期限の標的）"
+    req:
+      /api/tickets/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_req1.res.body.token }}" }
+          body: { application/json: { title: "assign/due target", body: "ok" } }
+    test: current.res.status == 201
+  # --- 割当（assign）---
+  admin_assign_agent:
+    desc: "Admin は Agent を割当できる（200）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/assign/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_admin.res.body.token }}" }
+          body: { application/json: { assignee: agent1 } }
+    test: current.res.status == 200
+  admin_assign_nonagent:
+    desc: "Admin でも assignee が Agent でなければ 400"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/assign/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_admin.res.body.token }}" }
+          body: { application/json: { assignee: requester1 } }
+    test: current.res.status == 400
+  admin_unassign:
+    desc: "Admin は担当解除できる（200）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/assign/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_admin.res.body.token }}" }
+          body: { application/json: { assignee: "" } }
+    test: current.res.status == 200
+  agent_cannot_assign:
+    desc: "Agent は割当できない（403, RQ-030）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/assign/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_agent1.res.body.token }}" }
+          body: { application/json: { assignee: agent2 } }
+    test: current.res.status == 403
+  requester_cannot_assign:
+    desc: "Requester は割当できない（403, RQ-027）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/assign/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_req1.res.body.token }}" }
+          body: { application/json: { assignee: agent1 } }
+    test: current.res.status == 403
+  # --- 期限（due）---
+  admin_due_ok:
+    desc: "Admin は期限変更できる（200）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/due/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_admin.res.body.token }}" }
+          body: { application/json: { due_date: "2999-12-31" } }
+    test: current.res.status == 200
+  agent_cannot_due:
+    desc: "Agent は期限変更できない（403, RQ-031）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/due/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_agent1.res.body.token }}" }
+          body: { application/json: { due_date: "2999-12-31" } }
+    test: current.res.status == 403
+  requester_cannot_due:
+    desc: "Requester は期限変更できない（403, RQ-028）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/due/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_req1.res.body.token }}" }
+          body: { application/json: { due_date: "2999-12-31" } }
+    test: current.res.status == 403

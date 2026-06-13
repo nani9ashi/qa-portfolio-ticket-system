@@ -1,0 +1,66 @@
+desc: "未認証: トークンなしのアクセスはすべて 401（HTML は 302 リダイレクト、API は 401 で一意）"
+runners:
+  req: "http://127.0.0.1:8000"
+steps:
+  list_unauth:
+    desc: "一覧（未認証）-> 401"
+    req:
+      /api/tickets/:
+        get:
+          headers:
+            Accept: "application/json"
+    test: current.res.status == 401
+  detail_unauth:
+    desc: "詳細（未認証）-> 401"
+    req:
+      /api/tickets/1/:
+        get:
+          headers:
+            Accept: "application/json"
+    test: current.res.status == 401
+  create_unauth:
+    desc: "作成（未認証）-> 401"
+    req:
+      /api/tickets/:
+        post:
+          body:
+            application/json:
+              title: x
+              body: y
+    test: current.res.status == 401
+  status_unauth:
+    desc: "ステータス変更（未認証）-> 401"
+    req:
+      /api/tickets/1/status/:
+        post:
+          body:
+            application/json:
+              status: IN_PROGRESS
+    test: current.res.status == 401
+  assign_unauth:
+    desc: "担当変更（未認証）-> 401"
+    req:
+      /api/tickets/1/assign/:
+        post:
+          body:
+            application/json:
+              assignee: agent1
+    test: current.res.status == 401
+  due_unauth:
+    desc: "期限変更（未認証）-> 401"
+    req:
+      /api/tickets/1/due/:
+        post:
+          body:
+            application/json:
+              due_date: "2030-01-01"
+    test: current.res.status == 401
+  comment_unauth:
+    desc: "コメント（未認証）-> 401"
+    req:
+      /api/tickets/1/comment/:
+        post:
+          body:
+            application/json:
+              body: hi
+    test: current.res.status == 401

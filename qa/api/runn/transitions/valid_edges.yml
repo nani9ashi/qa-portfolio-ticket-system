@@ -1,0 +1,154 @@
+desc: "状態遷移(妥当): 定義された6エッジがすべて成功し、遷移後ステータスが正しい"
+# 期待値は status と body.status で一意に書き下す（① の決定的な世界）。
+# ALLOWED_TRANSITIONS（models.py）の全許可エッジを2チケットで網羅する。
+runners:
+  req: "http://127.0.0.1:8000"
+vars:
+  password: pass1234
+steps:
+  login_req1:
+    desc: "requester1 トークン"
+    req:
+      /api/auth/token/:
+        post:
+          body:
+            application/json:
+              username: requester1
+              password: "{{ vars.password }}"
+    test: current.res.status == 200
+  login_admin:
+    desc: "admin1 トークン"
+    req:
+      /api/auth/token/:
+        post:
+          body:
+            application/json:
+              username: admin1
+              password: "{{ vars.password }}"
+    test: current.res.status == 200
+  login_agent1:
+    desc: "agent1 トークン"
+    req:
+      /api/auth/token/:
+        post:
+          body:
+            application/json:
+              username: agent1
+              password: "{{ vars.password }}"
+    test: current.res.status == 200
+
+  # --- Ticket A: OPEN -> IN_PROGRESS -> RESOLVED -> CLOSED ---
+  create_a:
+    desc: "requester1 が Ticket A を作成（OPEN）"
+    req:
+      /api/tickets/:
+        post:
+          headers:
+            Authorization: "Token {{ steps.login_req1.res.body.token }}"
+          body:
+            application/json:
+              title: "edge A"
+              body: "linear path open->closed"
+    test: current.res.status == 201 && current.res.body.status == "OPEN"
+  assign_a:
+    desc: "admin が agent1 を担当に割当"
+    req:
+      /api/tickets/{{ steps.create_a.res.body.id }}/assign/:
+        post:
+          headers:
+            Authorization: "Token {{ steps.login_admin.res.body.token }}"
+          body:
+            application/json:
+              assignee: agent1
+    test: current.res.status == 200
+  a_open_to_inprogress:
+    desc: "OPEN -> IN_PROGRESS"
+    req:
+      /api/tickets/{{ steps.create_a.res.body.id }}/status/:
+        post:
+          headers:
+            Authorization: "Token {{ steps.login_agent1.res.body.token }}"
+          body:
+            application/json:
+              status: IN_PROGRESS
+    test: current.res.status == 200 && current.res.body.status == "IN_PROGRESS"
+  a_inprogress_to_resolved:
+    desc: "IN_PROGRESS -> RESOLVED"
+    req:
+      /api/tickets/{{ steps.create_a.res.body.id }}/status/:
+        post:
+          headers:
+            Authorization: "Token {{ steps.login_agent1.res.body.token }}"
+          body:
+            application/json:
+              status: RESOLVED
+    test: current.res.status == 200 && current.res.body.status == "RESOLVED"
+  a_resolved_to_closed:
+    desc: "RESOLVED -> CLOSED"
+    req:
+      /api/tickets/{{ steps.create_a.res.body.id }}/status/:
+        post:
+          headers:
+            Authorization: "Token {{ steps.login_agent1.res.body.token }}"
+          body:
+            application/json:
+              status: CLOSED
+    test: current.res.status == 200 && current.res.body.status == "CLOSED"
+
+  # --- Ticket B: OPEN -> PENDING -> IN_PROGRESS -> PENDING ---
+  create_b:
+    desc: "requester1 が Ticket B を作成（OPEN）"
+    req:
+      /api/tickets/:
+        post:
+          headers:
+            Authorization: "Token {{ steps.login_req1.res.body.token }}"
+          body:
+            application/json:
+              title: "edge B"
+              body: "pending loop"
+    test: current.res.status == 201
+  assign_b:
+    desc: "admin が agent1 を担当に割当"
+    req:
+      /api/tickets/{{ steps.create_b.res.body.id }}/assign/:
+        post:
+          headers:
+            Authorization: "Token {{ steps.login_admin.res.body.token }}"
+          body:
+            application/json:
+              assignee: agent1
+    test: current.res.status == 200
+  b_open_to_pending:
+    desc: "OPEN -> PENDING"
+    req:
+      /api/tickets/{{ steps.create_b.res.body.id }}/status/:
+        post:
+          headers:
+            Authorization: "Token {{ steps.login_agent1.res.body.token }}"
+          body:
+            application/json:
+              status: PENDING
+    test: current.res.status == 200 && current.res.body.status == "PENDING"
+  b_pending_to_inprogress:
+    desc: "PENDING -> IN_PROGRESS"
+    req:
+      /api/tickets/{{ steps.create_b.res.body.id }}/status/:
+        post:
+          headers:
+            Authorization: "Token {{ steps.login_agent1.res.body.token }}"
+          body:
+            application/json:
+              status: IN_PROGRESS
+    test: current.res.status == 200 && current.res.body.status == "IN_PROGRESS"
+  b_inprogress_to_pending:
+    desc: "IN_PROGRESS -> PENDING"
+    req:
+      /api/tickets/{{ steps.create_b.res.body.id }}/status/:
+        post:
+          headers:
+            Authorization: "Token {{ steps.login_agent1.res.body.token }}"
+          body:
+            application/json:
+              status: PENDING
+    test: current.res.status == 200 && current.res.body.status == "PENDING"

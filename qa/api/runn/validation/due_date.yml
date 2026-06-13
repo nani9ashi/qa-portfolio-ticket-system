@@ -1,0 +1,58 @@
+desc: "入力検証(期限): 過去日/不正フォーマットは 400、未来日と空は許可（RQ-006 / DEFECT-003 の API 期待値）"
+# 決定論のため絶対日付（明らかな過去/未来）で検証する。HTML 側は同入力で 500 だった（DEFECT-003）。
+runners:
+  req: "http://127.0.0.1:8000"
+vars:
+  password: pass1234
+steps:
+  login_req1:
+    req:
+      /api/auth/token/:
+        post:
+          body: { application/json: { username: requester1, password: "{{ vars.password }}" } }
+    test: current.res.status == 200
+  login_admin:
+    req:
+      /api/auth/token/:
+        post:
+          body: { application/json: { username: admin1, password: "{{ vars.password }}" } }
+    test: current.res.status == 200
+  create_x:
+    req:
+      /api/tickets/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_req1.res.body.token }}" }
+          body: { application/json: { title: "due bva", body: "ok" } }
+    test: current.res.status == 201
+  due_past_rejected:
+    desc: "過去日は 400（DEFECT-003: HTML は 500 だった不具合の API 期待値）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/due/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_admin.res.body.token }}" }
+          body: { application/json: { due_date: "2000-01-01" } }
+    test: current.res.status == 400
+  due_malformed_rejected:
+    desc: "不正フォーマットは 400（DEFECT-003 二次原因の API 期待値）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/due/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_admin.res.body.token }}" }
+          body: { application/json: { due_date: "not-a-date" } }
+    test: current.res.status == 400
+  due_future_ok:
+    desc: "未来日は許可（200）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/due/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_admin.res.body.token }}" }
+          body: { application/json: { due_date: "2999-12-31" } }
+    test: current.res.status == 200 && current.res.body.due_date == "2999-12-31"
+  due_empty_clears:
+    desc: "空は許可（200・クリア）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/due/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_admin.res.body.token }}" }
+          body: { application/json: { due_date: "" } }
+    test: current.res.status == 200 && current.res.body.due_date == null

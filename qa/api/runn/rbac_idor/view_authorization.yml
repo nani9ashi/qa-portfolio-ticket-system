@@ -1,0 +1,97 @@
+desc: "参照認可マトリクス: 詳細の可視性と一覧のロール別スコープ（RQ-015/016/017）"
+# 詳細: Admin/Agent は全件可、Requester は自分のみ（他人は 403）。
+# 一覧: Requester は自分のチケットのみ見える（他人のは含まれない）ことを filter で検証。
+runners:
+  req: "http://127.0.0.1:8000"
+vars:
+  password: pass1234
+steps:
+  login_req1:
+    req:
+      /api/auth/token/:
+        post:
+          body: { application/json: { username: requester1, password: "{{ vars.password }}" } }
+    test: current.res.status == 200
+  login_req2:
+    req:
+      /api/auth/token/:
+        post:
+          body: { application/json: { username: requester2, password: "{{ vars.password }}" } }
+    test: current.res.status == 200
+  login_agent1:
+    req:
+      /api/auth/token/:
+        post:
+          body: { application/json: { username: agent1, password: "{{ vars.password }}" } }
+    test: current.res.status == 200
+  login_admin:
+    req:
+      /api/auth/token/:
+        post:
+          body: { application/json: { username: admin1, password: "{{ vars.password }}" } }
+    test: current.res.status == 200
+  create_x_req1:
+    desc: "requester1 のチケット X"
+    req:
+      /api/tickets/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_req1.res.body.token }}" }
+          body: { application/json: { title: "owned by req1", body: "x" } }
+    test: current.res.status == 201
+  create_y_req2:
+    desc: "requester2 のチケット Y"
+    req:
+      /api/tickets/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_req2.res.body.token }}" }
+          body: { application/json: { title: "owned by req2", body: "y" } }
+    test: current.res.status == 201
+  # --- 詳細の可視性 ---
+  owner_sees_own:
+    desc: "Requester は自分のチケットを参照できる（200）"
+    req:
+      /api/tickets/{{ steps.create_x_req1.res.body.id }}/:
+        get:
+          headers: { Authorization: "Token {{ steps.login_req1.res.body.token }}" }
+    test: current.res.status == 200
+  admin_sees_any:
+    desc: "Admin は他人のチケットも参照できる（200）"
+    req:
+      /api/tickets/{{ steps.create_x_req1.res.body.id }}/:
+        get:
+          headers: { Authorization: "Token {{ steps.login_admin.res.body.token }}" }
+    test: current.res.status == 200
+  agent_sees_any:
+    desc: "Agent は他人のチケットも参照できる（200）"
+    req:
+      /api/tickets/{{ steps.create_x_req1.res.body.id }}/:
+        get:
+          headers: { Authorization: "Token {{ steps.login_agent1.res.body.token }}" }
+    test: current.res.status == 200
+  requester_denied_other:
+    desc: "Requester は他人のチケットを参照できない（403）"
+    req:
+      /api/tickets/{{ steps.create_y_req2.res.body.id }}/:
+        get:
+          headers: { Authorization: "Token {{ steps.login_req1.res.body.token }}" }
+    test: current.res.status == 403
+  # --- 一覧のスコープ（Requester は自分のみ）---
+  req1_list_scoped:
+    desc: "requester1 の一覧に X は含まれ、他人の Y は含まれない"
+    req:
+      /api/tickets/:
+        get:
+          headers: { Authorization: "Token {{ steps.login_req1.res.body.token }}" }
+    test: |
+      current.res.status == 200
+      && len(filter(current.res.body, #.id == steps.create_x_req1.res.body.id)) == 1
+      && len(filter(current.res.body, #.id == steps.create_y_req2.res.body.id)) == 0
+  admin_list_all:
+    desc: "Admin の一覧には他人の Y も含まれる"
+    req:
+      /api/tickets/:
+        get:
+          headers: { Authorization: "Token {{ steps.login_admin.res.body.token }}" }
+    test: |
+      current.res.status == 200
+      && len(filter(current.res.body, #.id == steps.create_y_req2.res.body.id)) == 1

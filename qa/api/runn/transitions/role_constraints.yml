@@ -1,0 +1,104 @@
+desc: "ステータス変更の認可（デシジョンテーブル R1-R6 / docs/30_test_design.md §3.2 の API 実現）"
+# R1: Closed は変更禁止 / R2: Admin 常に可 / R3: 担当Agent可 / R4: 非担当Agent不可 /
+# R5: 未割当はAgent不可 / R6: Requester不可。状態遷移の妥当性(§3.1)と AND で最終可否が決まる。
+runners:
+  req: "http://127.0.0.1:8000"
+vars:
+  password: pass1234
+steps:
+  login_req1:
+    req:
+      /api/auth/token/:
+        post:
+          body: { application/json: { username: requester1, password: "{{ vars.password }}" } }
+    test: current.res.status == 200
+  login_agent1:
+    req:
+      /api/auth/token/:
+        post:
+          body: { application/json: { username: agent1, password: "{{ vars.password }}" } }
+    test: current.res.status == 200
+  login_agent2:
+    req:
+      /api/auth/token/:
+        post:
+          body: { application/json: { username: agent2, password: "{{ vars.password }}" } }
+    test: current.res.status == 200
+  login_admin:
+    req:
+      /api/auth/token/:
+        post:
+          body: { application/json: { username: admin1, password: "{{ vars.password }}" } }
+    test: current.res.status == 200
+  create_x:
+    desc: "requester1 が X を作成（OPEN・未割当）"
+    req:
+      /api/tickets/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_req1.res.body.token }}" }
+          body: { application/json: { title: "decision table", body: "R1-R6" } }
+    test: current.res.status == 201
+  r5_agent_unassigned:
+    desc: "R5: 未割当チケットは Agent が変更不可（403）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/status/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_agent1.res.body.token }}" }
+          body: { application/json: { status: IN_PROGRESS } }
+    test: current.res.status == 403
+  r6_requester:
+    desc: "R6: Requester は自分のチケットでも変更不可（403）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/status/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_req1.res.body.token }}" }
+          body: { application/json: { status: IN_PROGRESS } }
+    test: current.res.status == 403
+  assign_agent1:
+    desc: "admin が agent1 を割当"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/assign/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_admin.res.body.token }}" }
+          body: { application/json: { assignee: agent1 } }
+    test: current.res.status == 200
+  r3_agent_assignee:
+    desc: "R3: 担当 Agent は変更可（200, OPEN->IN_PROGRESS）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/status/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_agent1.res.body.token }}" }
+          body: { application/json: { status: IN_PROGRESS } }
+    test: current.res.status == 200 && current.res.body.status == "IN_PROGRESS"
+  r4_agent_nonassignee:
+    desc: "R4: 非担当 Agent(agent2) は変更不可（403）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/status/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_agent2.res.body.token }}" }
+          body: { application/json: { status: RESOLVED } }
+    test: current.res.status == 403
+  r2_admin:
+    desc: "R2: Admin は常に変更可（200, IN_PROGRESS->RESOLVED）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/status/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_admin.res.body.token }}" }
+          body: { application/json: { status: RESOLVED } }
+    test: current.res.status == 200 && current.res.body.status == "RESOLVED"
+  admin_to_closed:
+    desc: "Admin が RESOLVED->CLOSED（R1 準備）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/status/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_admin.res.body.token }}" }
+          body: { application/json: { status: CLOSED } }
+    test: current.res.status == 200
+  r1_closed_admin:
+    desc: "R1: Closed は Admin でも変更禁止（409・終端が他条件に優先）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/status/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_admin.res.body.token }}" }
+          body: { application/json: { status: IN_PROGRESS } }
+    test: current.res.status == 409

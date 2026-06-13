@@ -1,0 +1,72 @@
+desc: "作成認可: Requester のみ作成可。Agent/Admin は 403（RQ-012/013）"
+runners:
+  req: "http://127.0.0.1:8000"
+vars:
+  password: pass1234
+steps:
+  login_req1:
+    desc: "requester1 トークン"
+    req:
+      /api/auth/token/:
+        post:
+          body:
+            application/json:
+              username: requester1
+              password: "{{ vars.password }}"
+    test: current.res.status == 200
+  login_agent1:
+    desc: "agent1 トークン"
+    req:
+      /api/auth/token/:
+        post:
+          body:
+            application/json:
+              username: agent1
+              password: "{{ vars.password }}"
+    test: current.res.status == 200
+  login_admin:
+    desc: "admin1 トークン"
+    req:
+      /api/auth/token/:
+        post:
+          body:
+            application/json:
+              username: admin1
+              password: "{{ vars.password }}"
+    test: current.res.status == 200
+  requester_can_create:
+    desc: "Requester は作成できる（201）"
+    req:
+      /api/tickets/:
+        post:
+          headers:
+            Authorization: "Token {{ steps.login_req1.res.body.token }}"
+          body:
+            application/json:
+              title: "by requester"
+              body: "ok"
+    test: current.res.status == 201
+  agent_cannot_create:
+    desc: "Agent は作成できない（403）"
+    req:
+      /api/tickets/:
+        post:
+          headers:
+            Authorization: "Token {{ steps.login_agent1.res.body.token }}"
+          body:
+            application/json:
+              title: "by agent"
+              body: "ng"
+    test: current.res.status == 403
+  admin_cannot_create:
+    desc: "Admin は作成できない（403・起票責務は Requester に集約）"
+    req:
+      /api/tickets/:
+        post:
+          headers:
+            Authorization: "Token {{ steps.login_admin.res.body.token }}"
+          body:
+            application/json:
+              title: "by admin"
+              body: "ng"
+    test: current.res.status == 403

@@ -1,0 +1,132 @@
+desc: "状態遷移(不当): 禁止エッジは 409、enum 外の不正値は 400"
+# 妥当値だが禁止された遷移＝状態競合(409)。enum 外の値＝入力不正(400)。期待値を一意に分離。
+runners:
+  req: "http://127.0.0.1:8000"
+vars:
+  password: pass1234
+steps:
+  login_req1:
+    req:
+      /api/auth/token/:
+        post:
+          body: { application/json: { username: requester1, password: "{{ vars.password }}" } }
+    test: current.res.status == 200
+  login_admin:
+    req:
+      /api/auth/token/:
+        post:
+          body: { application/json: { username: admin1, password: "{{ vars.password }}" } }
+    test: current.res.status == 200
+  login_agent1:
+    req:
+      /api/auth/token/:
+        post:
+          body: { application/json: { username: agent1, password: "{{ vars.password }}" } }
+    test: current.res.status == 200
+  create_x:
+    desc: "X を作成（OPEN）し agent1 を割当"
+    req:
+      /api/tickets/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_req1.res.body.token }}" }
+          body: { application/json: { title: "invalid edges", body: "from OPEN" } }
+    test: current.res.status == 201
+  assign_x:
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/assign/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_admin.res.body.token }}" }
+          body: { application/json: { assignee: agent1 } }
+    test: current.res.status == 200
+  x_open_to_closed:
+    desc: "OPEN -> CLOSED は禁止（409）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/status/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_agent1.res.body.token }}" }
+          body: { application/json: { status: CLOSED } }
+    test: current.res.status == 409
+  x_open_to_resolved:
+    desc: "OPEN -> RESOLVED は禁止（409）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/status/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_agent1.res.body.token }}" }
+          body: { application/json: { status: RESOLVED } }
+    test: current.res.status == 409
+  x_bad_value:
+    desc: "enum 外の不正なステータス値は 400"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/status/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_agent1.res.body.token }}" }
+          body: { application/json: { status: NOT_A_STATUS } }
+    test: current.res.status == 400
+  # X を CLOSED まで進める（妥当エッジ）
+  x_to_inprogress:
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/status/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_agent1.res.body.token }}" }
+          body: { application/json: { status: IN_PROGRESS } }
+    test: current.res.status == 200
+  x_to_resolved:
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/status/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_agent1.res.body.token }}" }
+          body: { application/json: { status: RESOLVED } }
+    test: current.res.status == 200
+  x_to_closed:
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/status/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_agent1.res.body.token }}" }
+          body: { application/json: { status: CLOSED } }
+    test: current.res.status == 200
+  x_closed_terminal:
+    desc: "CLOSED からの遷移はすべて禁止（409・終端）"
+    req:
+      /api/tickets/{{ steps.create_x.res.body.id }}/status/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_agent1.res.body.token }}" }
+          body: { application/json: { status: IN_PROGRESS } }
+    test: current.res.status == 409
+  # Ticket Y: PENDING からの禁止エッジ
+  create_y:
+    req:
+      /api/tickets/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_req1.res.body.token }}" }
+          body: { application/json: { title: "pending invalid", body: "from PENDING" } }
+    test: current.res.status == 201
+  assign_y:
+    req:
+      /api/tickets/{{ steps.create_y.res.body.id }}/assign/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_admin.res.body.token }}" }
+          body: { application/json: { assignee: agent1 } }
+    test: current.res.status == 200
+  y_to_pending:
+    req:
+      /api/tickets/{{ steps.create_y.res.body.id }}/status/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_agent1.res.body.token }}" }
+          body: { application/json: { status: PENDING } }
+    test: current.res.status == 200
+  y_pending_to_resolved:
+    desc: "PENDING -> RESOLVED は禁止（409）"
+    req:
+      /api/tickets/{{ steps.create_y.res.body.id }}/status/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_agent1.res.body.token }}" }
+          body: { application/json: { status: RESOLVED } }
+    test: current.res.status == 409
+  y_pending_to_closed:
+    desc: "PENDING -> CLOSED は禁止（409）"
+    req:
+      /api/tickets/{{ steps.create_y.res.body.id }}/status/:
+        post:
+          headers: { Authorization: "Token {{ steps.login_agent1.res.body.token }}" }
+          body: { application/json: { status: CLOSED } }
+    test: current.res.status == 409
