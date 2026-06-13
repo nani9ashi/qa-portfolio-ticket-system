@@ -8,8 +8,10 @@
   - 閲覧自体は可能（Agent は全チケット閲覧可、RQ-016）
   - "Not allowed to change status." が表示される（`detail.html:67-68`）
   - status 変更用の `<select name='status'>` が DOM に存在しない
-- 「見えるが触れない」を UI 側面で担保する。
-- 直叩きPOST（API側面）の検証は手動TC-007/TC-029側でカバー（CSRF処理コストにより自動化スコープ外）。
+- 「見えるが触れない」を UI 側面で担保する（本テストの責務は UI 抑止のみに限定）。
+- サーバ側の認可（非担当 Agent のステータス変更 → 403）は runn `transitions/role_constraints.yml`（R4）
+  でカバー。本拡張で「直叩き POST は CSRF コストにより自動化スコープ外」だった旧制約を API 層で解消した。
+  （テストピラミッド再配分：組合せ認可は API 層へ、UI 抑止のみ E2E に残す）
 """
 
 from playwright.sync_api import expect
