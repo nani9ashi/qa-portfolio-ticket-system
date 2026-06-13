@@ -32,6 +32,14 @@ jobs:
           # Playwrightのブラウザ＋OS依存（--with-depsでlib類も自動解決）
           python -m playwright install --with-deps chromium
 
+      # モデルとマイグレーションの不整合（ドリフト）を検知。未捕捉のモデル変更があれば失敗する。
+      - name: Check for missing migrations
+        env:
+          SECRET_KEY: "django-insecure-test-key-do-not-use-in-production"
+        run: |
+          cd app
+          python manage.py makemigrations --check --dry-run
+
       # 4. データベースの準備（マイグレーション & データ投入）
       - name: Prepare Database
         env:
