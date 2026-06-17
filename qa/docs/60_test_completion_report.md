@@ -178,7 +178,7 @@ Backlog（A/B/C分類）の正本は [70_requirements_test_traceability.md §8](
 - **共通fixtureの整備**：`qa/automation/conftest.py` に `login` / `base_url` / `evidence_dir` fixtureを集約し、シナリオ追加時のボイラープレートを最小化（4シナリオで重複コードがほぼゼロ）。
 - **環境依存の排除**：BASE_URL を環境変数化（既定はローカルサーバー）。CI／ローカル／別ポートでの実行を1コマンドで切替え可能に。
 - **証跡の構造化**：テスト名ごとに `evidence/auto/<test_name>/` のサブディレクトリ自動生成。スクショの帰属が明確化。
-- **責務分離の体現**：title はクライアント抑止（`maxlength=80`）、body はサーバ側バリデーション、と異なる検証層をテストで明示（Auto-03）。
+- **責務分離の体現**：title はクライアント抑止（`maxlength=80`）、body はサーバ側バリデーション、と異なる検証層を明示（境界値の自動検証は現在 runn API-C が担う）。
 
 ### 11.3 検出能力の実演手順（IDOR回帰）
 Auto-02 は **意図的に失敗させることが可能** で、QAテストの「検出能力」自体を見せる材料として用意している。
@@ -211,8 +211,8 @@ GitHub Actionsを用いたCI環境におけるテスト実行結果、および�
 
 - **テスト成功率**：**100%**（4/4 Pass、`INTENTIONAL_BUG_IDOR=False` 既定状態、DEFECT-002 修正後）。
 - **実行効率の向上**：手動実施で約12分（4シナリオ × 約180秒）に対し、自動実施でローカル実測 約3〜4秒（fixture共有・並列なし）。**約99%のリードタイム短縮**となり、カバー範囲は1→4本に拡大。
-- **品質ゲートの構築**：CI上で4シナリオを「マージの必須条件」化。セキュリティ／バリデーション／認可の3観点で自動的に回帰検知。
-- **リスク低減**：DEFECT-001（IDOR）／DEFECT-002（body長制約） の再発を Auto-02／Auto-03 が即時検知する体制を構築。
+- **品質ゲートの構築**：CI で **E2E 4シナリオ＋runn 10 runbook** を毎push必須化。認可（IDOR/RBAC）・状態遷移・入力境界を多層で自動回帰検知。
+- **リスク低減**：DEFECT-001（IDOR）の再発を Auto-02（E2E）＋API-A（runn/idor）、DEFECT-002（body長制約）を API-C（runn/title_body_boundary）、DEFECT-003（期限500）を Auto-05＋API-C（due_date）が即時検知する体制を構築。
 
 ### 11.6 今後の拡張計画（Backlog）
 - ~~**直叩きAPIテスト**：CSRF処理ヘルパーを整備し、サーバ側を自動化~~ → **✓ v1.2 で実現**（runn API 層・CSRF 不要の Token 認証 API。§11.7）。

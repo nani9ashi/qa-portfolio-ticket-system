@@ -74,19 +74,19 @@ QAリスク観点（IDOR／境界値／RBAC／状態遷移）の**組合せ網�
 - **E2E シナリオ構成（再配分後）**: ハッピーパス（Auto-01）／IDOR回帰スモーク（Auto-02）／非担当AgentのUI抑止（Auto-04）／期限過去日の graceful 拒否（Auto-05、DEFECT-003回帰）。組合せ網羅（境界値・認可マトリクス・状態遷移）は runn 層へ移設。詳細は [60_test_completion_report.md §11](./qa/docs/60_test_completion_report.md#11-付記テスト自動化の実施結果-automated-test-summary)。
 - **堅牢な実装 (Robust Automation)**: `name`属性などの不変属性を用いたロケータ戦略。共通fixture（`qa/automation/conftest.py`）でログイン・BASE_URL・証跡保存を集約。
 - **Framework**: Playwright + pytest を使用。`BASE_URL` 環境変数で接続先切替可。
-- **CI**: GitHub Actionsにより、PR作成時に4シナリオすべてを自動実行。
+- **CI**: GitHub Actions により、push / PR 時に **E2E 4シナリオ**と **runn API（10 runbook）** を並列自動実行。
 
 #### 自動テストが捕捉した代表的な挙動
 
 以下は CI Artifacts から取得した実際のスクリーンショットです。
 
-**Auto-03 — DEFECT-002 修正後の本文バリデーション**
+**DEFECT-002 — 自動化が検出した実バグ（本文長制約の未実装）**
 
-![Auto-03: 本文4001文字のサーバ側拒否](./qa/docs/images/auto-03_body_validation_error.png)
+![本文4001文字のサーバ側拒否（検出当時のE2E証跡）](./qa/docs/images/auto-03_body_validation_error.png)
 
-本文4001文字での作成試行に対し、`Ensure this value has at most 4000 characters (it has 4001).` を表示して拒否。本シナリオの実装中に **[DEFECT-002](./qa/defects/reports/DEFECT-002.md)（body max_length 未実装）** を検出・修正・回帰確認した。
+本文の境界値テストを自動化する過程で **[DEFECT-002](./qa/defects/reports/DEFECT-002.md)（body の max_length が未 enforce）** を検出し、起票 → 修正 → 回帰まで完了した。上図は検出当時の E2E 証跡（`Ensure this value has at most 4000 characters (it has 4001).` を表示して拒否）。
 
-> 本拡張で本境界値検証は runn `validation/title_body_boundary.yml` の **4点境界（空/1/最大/最大+1）** へ移設し、Auto-03 自体は削除した（上図は移設前の E2E 証跡）。
+> 現在この境界検証は **runn の API 層（API-C / `validation/title_body_boundary.yml` の4点境界）** が担う（テストピラミッド最適化で E2E から移設）。「想定で書いた自動テストが意外な FAIL を返し、それがバグ発見につながった」過程を残した事例。
 
 **Auto-04 — 非担当Agentの認可UI抑止**
 
@@ -116,7 +116,7 @@ RBAC（権限マトリクス）と状態遷移という「組合せが爆発す�
 
 ## 動作確認
 
-CIで `push` / `pull_request` 時に4シナリオを自動実行（上部バッジ参照）。手元で動かす場合の手順は **[SETUP.md](./SETUP.md)** に集約しています。
+CIで `push` / `pull_request` 時に **E2E 4シナリオ＋runn 10 runbook** を自動実行（上部バッジ参照）。手元で動かす場合の手順は **[SETUP.md](./SETUP.md)** に集約しています。
 
 ## 作者
 
