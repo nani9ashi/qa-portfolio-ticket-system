@@ -1,52 +1,59 @@
-# BtoB チケット管理システム：QA技術ポートフォリオ
+# QAポートフォリオ① 技術・基礎編 — BtoB チケット管理システム
+
 [![CI Pipeline](https://github.com/nani9ashi/qa-portfolio-ticket-system/actions/workflows/ci.yml/badge.svg)](https://github.com/nani9ashi/qa-portfolio-ticket-system/actions/workflows/ci.yml)
 
-## このポートフォリオの位置付け
+> **なぜこの題材か** — 施設警備の現場で、シフト管理 SaaS の導入に立ち会った。機能は揃っているのに、紙の出勤簿は最後まで置き換えられなかった——現場の暗黙の要件が、仕様のどこにも書かれていなかったからだ。「動くこと」と「業務で使えること」の間にある品質を、今度は保証する側として自分の手で作り込む。その最初の一歩が、権限（RBAC）と状態遷移が絡む BtoB 業務システムを題材にした本作である。
 
-本リポジトリは、QA エンジニアとして取り組んでいるポートフォリオシリーズの一つです。3 作は「品質保証で何を担うか」を段階的に広げており、**学習の深化の軌跡**としてご覧いただけます。
+## 数字で見る成果
 
-- **本リポジトリ** — QA 技術・基礎編。BtoB チケット管理システムを対象に、CI/CD・E2E 自動化・JSTQB 準拠ドキュメントで品質を作りこむ。
-- **[AI学習レコメンド機能](https://github.com/nani9ashi/qa-portfolio-ai-recommender)** — QA 戦略・AI 編。確率的に揺らぐ生成 AI プロダクトを対象に、LLM-as-a-judge を含む複数層のテストで品質を設計する。
-- **[既存の物体検出モデル](https://github.com/nani9ashi/qa-portfolio-object-detection)** — QA 評価・判断編。自分で作っていない調達候補モデルを外から評価し、固定した基準に対して導入可否を判断し品質を守る。
+- 手動テスト **46 ケース**（JSTQB 準拠：テスト計画 → 設計 → 実行 → 完了報告のドキュメント一式）
+- API/インテグレーション自動テスト **10 runbook / 102 step**（runn）
+- E2E 自動テスト **4 シナリオ**（Playwright、CI で毎 push 実行）
+- 実バグ **3 件**を発見し、**起票 → 修正 → 回帰確認**まで完遂（DEFECT-001〜003）
+- テストピラミッド再配分：組合せ網羅を E2E から API 層へ押し下げ、E2E を代表シナリオに集約
 
-## プロジェクト概要
+## 何を作り、何を保証したか
 
-BtoB業務を想定した **複雑な RBAC と状態遷移を持つチケット管理アプリ** を対象に、JSTQB 準拠のテストプロセスと E2E 自動化（CI 品質ゲート）を一人称で完遂した統合ポートフォリオです。SUT の詳細は [app/README](./app/README.md) を参照。
+一人二役で、開発者として SUT（テスト対象システム）を用意し、QA としてテストプロセス一式を完遂しています。**このリポジトリの主役は `qa/` 配下の QA 成果物**で、`app/` はその対象です。
+
+| 区分 | 中身 | 入口 |
+| :--- | :--- | :--- |
+| **作ったもの（SUT）** | Django 製チケット管理アプリ。ロール認可（RBAC）・状態遷移・入力検証・テスト用の意図的欠陥スイッチを実装 | [app/README](./app/README.md)（[§5 RBAC](./app/README.md#5-ロールと権限仕様rbac)／[§6 状態遷移](./app/README.md#6-ステータス遷移仕様state-machine)／[§9 欠陥スイッチ](./app/README.md#9-テスト用の意図的欠陥bug-switch)） |
+| **保証したもの（QA 成果物）** | JSTQB 準拠ドキュメント一式・runn runbook・Playwright E2E・欠陥レポート | [qa/README](./qa/README.md) |
+
+```text
+root/
+├── .github/workflows/  # CI設定 (GitHub Actionsによる自動テスト実行)
+├── app/                # SUT: アプリケーション本体 (Django)
+└── qa/                 # QA成果物 (JSTQBプロセス準拠)
+```
+
+開発（`app`）とテスト（`qa`）を同一リポジトリで管理しているのはシフトレフトの意図です（Highlights §3・§4 を参照）。
+
+## ポートフォリオシリーズ
+
+本リポジトリは、「品質保証で何を担うか」——作り込む・設計する・判断する——を段階的に広げた 3 部作の一つです。
+
+- **本リポジトリ｜① 技術・基礎編** — 期待値を厳密に書き下せる決定的な業務システムを対象に、JSTQB 準拠のプロセスとテストピラミッド（手動・API・E2E）で品質を作り込む。
+- **[② 戦略・AI 編：AI学習レコメンド機能](https://github.com/nani9ashi/qa-portfolio-ai-recommender)** — 確率的に揺らぐ生成 AI プロダクトを対象に、テストを 2 層で設計し、判定 AI（測定器）自体の正しさまで人手正解との照合で検証する。
+- **[③ 評価・判断編：既存物体検出モデル](https://github.com/nani9ashi/qa-portfolio-object-detection)** — 自分で作っていない調達候補モデルを外から評価し、事前に固定した基準に対して導入可否（結論は No-Go）を判断する。
+
+3 作を貫く主題は「**物差し（期待値・判定器・受け入れ基準）そのものは正しいか**」という問いです。
 
 ## 技術スタック
 
 本ポートフォリオの技術スタックの正本です。app/README §2 と qa/README はここを参照します。
 
-| カテゴリ | 技術・ツール | 用途 |
-| --- | --- | --- |
-| **Language** | Python 3.12 | アプリケーションおよびテストコード記述 |
-| **Framework** | Django 6.0 | Webアプリケーション構築 (MVP) |
-| **API Layer (テスト容易性)** | Django REST Framework | runn 用の薄い JSON API（Token 認証・CSRF レス） |
-| **Test Automation** | Playwright | E2Eテスト自動化、スクリーンショット取得 |
-| **API/Integration Test** | runn (k1LoW) ※v1.9.2 固定 | 認可・状態遷移・入力検証の組合せ網羅（高速・決定的） |
-| **Test Runner** | pytest | テスト実行管理 |
-| **CI** | GitHub Actions | E2E（Playwright）と API（runn）を毎 push 自動実行・証跡保存 |
-| **Environment** | venv / pip | 仮想環境およびパッケージ管理 |
-
-## テスト対象システム (SUT: System Under Test)
-
-ロール認可（[§5](./app/README.md#5-ロールと権限仕様rbac)）／状態遷移（[§6](./app/README.md#6-ステータス遷移仕様state-machine)）／意図的欠陥スイッチ（[§9](./app/README.md#9-テスト用の意図的欠陥bug-switch)）を備えた SUT。詳細は [app/README](./app/README.md)。
-
-## ディレクトリ構成 (Monorepo)
-本リポジトリは、開発（Dev）と品質保証（QA）を統合管理しています。
-
-```text
-root/
-├── .github/workflows/  # CI設定 (GitHub Actionsによる自動テスト実行)
-├── app/                # アプリケーション本体 (Django)
-└── qa/                 # QA統合成果物 (JSTQBプロセス準拠)
-```
-
-## 主要ドキュメントへのリンク
-- **アプリケーション仕様**: [app/README](./app/README.md)  
-  - ロール権限、状態遷移、入力検証、意図的欠陥スイッチの解説
-- **テスト概要・自動化方針**: [qa/README](./qa/README.md)  
-  - テスト計画から完了報告までの一連のQAプロセス資料、および自動テストの実装詳細
+| 区分 | 技術・ツール | 用途 |
+| :--- | :--- | :--- |
+| 共通 | Python 3.12 | アプリケーションおよびテストコード記述 |
+| SUT | Django 6.0 | Webアプリケーション構築 (MVP) |
+| SUT（テスト容易性のため QA 判断で追加） | Django REST Framework | runn 用の薄い JSON API（Token 認証・CSRF レス） |
+| QA | Playwright | E2Eテスト自動化、スクリーンショット取得 |
+| QA | runn (k1LoW) ※v1.9.2 固定 | 認可・状態遷移・入力検証の組合せ網羅（高速・決定的） |
+| QA | pytest | テスト実行管理 |
+| 共通 | GitHub Actions | E2E（Playwright）と API（runn）を毎 push 自動実行・証跡保存 |
+| 共通 | venv / pip | 仮想環境およびパッケージ管理 |
 
 ## QA戦略: テストピラミッドに基づく3層構成 (Layered Strategy)
 
@@ -120,9 +127,11 @@ CIで `push` / `pull_request` 時に **E2E 4シナリオ＋runn 10 runbook** を
 
 ## 作者
 
-**仁後慎太郎**
+**仁後慎太郎**（[GitHub](https://github.com/nani9ashi)）
 
-「現場で本当に使えるプロダクトをどう作るか」に関心を持って学習を続けている社会人です。JSTQB Foundation Level 保有。塾講師や警備員としての経験と、哲学を専攻したバックグラウンドを持ち、**ユーザーや現場目線で仮説を立て、関係者と対話しながら品質を作り込む**スタイルを模索しています。正確性や信頼性が求められる BtoB 領域においても、観察力と論理性で価値を生み出していきたいと考えています。
+施設警備・個別指導塾・引越の現場で「使う側」として品質の不全を体験したことを出発点に、品質保証を主題として作品を作っています。JSTQB Foundation Level 保有。哲学のバックグラウンドから、**「受け入れ基準＝物差しそのものは正しいか」を問い直す**ことを QA の軸にしています。
+
+<!-- ポートフォリオサイト公開後: 全作品を束ねるサイトへのリンクをここに追加 -->
 
 ## ライセンス
 本プロジェクトは MITライセンス に基づいて公開されています。利用条件については [LICENSE](LICENSE) ファイルをご参照ください。
