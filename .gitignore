@@ -10,8 +10,6 @@ db.sqlite3
 local_settings.py
 
 # Playwright / Testing
-/qa/evidence/auto/
-/qa/results/
 .pytest_cache/
 
 # runn (API test layer) — CI / local generated artifacts（runbook 本体は qa/api/runn/ で追跡する）
