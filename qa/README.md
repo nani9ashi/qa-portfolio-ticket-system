@@ -58,7 +58,7 @@ qa/
 
 ## テスト自動化（Test Automation）
 
-自動テストは **3層**（単体／API／E2E）で運用しています。数字や配分の根拠は繰り返さず、[80 テスト層戦略](./docs/80_test_layer_strategy.md)（配分の根拠）と [90 自動テスト実施結果レポート](./docs/90_automated_test_report.md)（実施結果）を正本とします。
+自動テストは **3層**（単体／API／E2E）で運用しています。数字や配分の根拠は繰り返さず、[80 テスト層戦略](./docs/80_test_layer_strategy.md)（配分の根拠）と [90 自動テスト実施レポート](./docs/90_automated_test_report.md)（実施内容と結果）を正本とします。
 
 ### 単体層（pytest）
 `policy.py` の認可述語・状態遷移の純ロジックを検証します。テストコードは SUT 側 [app/tickets/tests/](../app/tickets/tests/)、実行は `cd app && python -m pytest`（[SETUP §3.5](../SETUP.md)）。
@@ -73,7 +73,7 @@ qa/
 - **Auto-05**：期限の過去日で 500 にならず graceful 拒否（DEFECT-003 回帰）
 - ※旧 Auto-03（本文境界）は runn `validation/` へ移設し削除。
 
-実装上の工夫・検出効果（DEFECT-002/003 を自動化が検出した事例を含む）は [自動テスト実施結果レポート（90）](./docs/90_automated_test_report.md) を参照。
+実装上の工夫・検出効果（DEFECT-002/003 を自動化が検出した事例を含む）は [自動テスト実施レポート（90）](./docs/90_automated_test_report.md) を参照。
 
 ### 技術スタック
 - **API Test**: runn (k1LoW) ※v1.9.2 固定 ／ 薄い JSON API は Django REST Framework（Token 認証）

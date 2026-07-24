@@ -161,4 +161,4 @@ Backlog（A/B/C分類）の正本は [70_requirements_test_traceability.md §8](
 
 ## 11. 付記：テスト自動化の実施結果 (Automated Test Summary)
 
-自動テスト（単体 53件／runn 10 runbook・102 step／E2E 4シナリオ、CI 3ジョブ並列）の実施結果・実装の工夫・検出した実欠陥（DEFECT-002/003）・変遷は、[自動テスト実施結果レポート（90）](90_automated_test_report.md) として独立させた。本書は手動テストフェーズの完了記録を正本とし、自動化の詳細は 90 を参照する。
+自動テスト（単体 53件／runn 10 runbook・102 step／E2E 4シナリオ、CI 3ジョブ並列）の実施結果・実装の工夫・検出した実欠陥（DEFECT-002/003）・変遷は、[自動テスト実施レポート（90）](90_automated_test_report.md) として独立させた。本書は手動テストフェーズの完了記録を正本とし、自動化の詳細は 90 を参照する。
