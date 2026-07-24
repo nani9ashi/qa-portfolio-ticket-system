@@ -2,13 +2,12 @@
 
 [![CI Pipeline](https://github.com/nani9ashi/qa-portfolio-ticket-system/actions/workflows/ci.yml/badge.svg)](https://github.com/nani9ashi/qa-portfolio-ticket-system/actions/workflows/ci.yml)
 
-*QAポートフォリオ3部作の①（技術・基礎編）。シリーズ全体は末尾「関連作品」を参照。*
+複雑な RBAC（ロール認可）と状態遷移を持つ BtoB チケット管理アプリを対象に、以下3つを一人称で完遂したプロジェクトです。
+- ①JSTQB 準拠のテストプロセス（計画 → 設計 → 実行 → 完了報告）
+- ②手動テスト 46 ケース
+- ③単体・API・E2E の3層に配分した自動テスト（CI 品質ゲート・3ジョブ並列）
 
-複雑な RBAC（ロール認可）と状態遷移を持つ BtoB チケット管理アプリを対象に、JSTQB 準拠のテストプロセス（計画 → 設計 → 実行 → 完了報告）と、単体・API・E2E の3層に配分した自動テスト（CI 品質ゲート・3ジョブ並列）、および手動テスト 46 ケースを一人称で完遂したプロジェクトです。開発者として SUT（テスト対象システム）を用意し、QA として保証する一人二役——**このリポジトリの主役は `qa/` 配下の QA 成果物**で、`app/` はその対象です。
-
-題材には、以前利用者として使っていたシフト管理 SaaS と同型の業務システム——ロールと権限で仕切られたチケット管理——を選びました。
-
-**結果として、手動 46 ケース・単体 53 件・API 102 ステップ・E2E 4 シナリオを設計・実行し、実バグ 3 件を起票 → 修正 → 回帰まで完遂。** 組合せが爆発する検証を E2E から下層（単体・API）へ押し下げる配分の判断も、根拠ごと文書化しました。
+**手動 46 ケース・単体 53 件・API 102 ステップ・E2E 4 シナリオを設計・実行し、実バグ 3 件を起票 → 修正 → 回帰テスト まで行っています。** 
 
 ## 成果サマリ
 
@@ -33,7 +32,7 @@ SUT は、ロール認可（[§5](./app/README.md#5-ロールと権限仕様rbac
 | 区分 | 中身 | 入口 |
 | :--- | :--- | :--- |
 | **作ったもの（SUT）** | Django 製チケット管理アプリ（RBAC・状態遷移・入力検証・意図的欠陥スイッチ） | [app/README](./app/README.md) |
-| **保証したもの（QA 成果物）** | JSTQB 準拠ドキュメント一式・runn runbook・Playwright E2E・欠陥レポート | [qa/README](./qa/README.md) |
+| **品質保証の過程（QA 成果物）** | JSTQB 準拠ドキュメント一式・runn runbook・Playwright E2E・欠陥レポート | [qa/README](./qa/README.md) |
 
 ```text
 root/
@@ -63,11 +62,11 @@ root/
 
 自動テストでは、QA リスク観点（IDOR／境界値／RBAC／状態遷移）の組合せ網羅を **runn の API/インテグレーション層（10 runbook / 102 step）** で高速・決定的に検証し、E2E は代表シナリオに集約しています。
 
-- **E2E シナリオ構成（再配分後）**: ハッピーパス（Auto-01）／IDOR回帰スモーク（Auto-02）／非担当AgentのUI抑止（Auto-04）／期限過去日の graceful 拒否（Auto-05、DEFECT-003回帰）。組合せ網羅（境界値・認可マトリクス・状態遷移）は runn 層へ移設。詳細は [90_automated_test_report.md](./qa/docs/90_automated_test_report.md)。
+- **E2E シナリオ構成**: ハッピーパス（Auto-01）／IDOR回帰スモーク（Auto-02）／非担当AgentのUI抑止（Auto-04）／期限過去日の graceful 拒否（Auto-05、DEFECT-003回帰）。
 - **堅牢な実装**: `name`属性などの不変属性を用いたロケータ戦略。共通fixture（`qa/automation/conftest.py`）でログイン・BASE_URL・証跡保存を集約。`BASE_URL` 環境変数で接続先切替可。
 - **CI**: GitHub Actions により、push / PR 時に **単体 53件・runn API（10 runbook）・E2E 4シナリオ**の3ジョブを並列自動実行し、証跡を保存。
 
-この仕組みが実際にバグを捉えた例を2つ示します（画像は CI Artifacts から取得した実際のスクリーンショット）。
+この仕組みが実際にバグを捉えた例を示します（画像は CI Artifacts から取得した実際のスクリーンショット）。
 
 **DEFECT-002 — 自動化が検出した実バグ（本文長制約の未実装）**
 
@@ -76,14 +75,6 @@ root/
 本文の境界値テストを自動化する過程で **[DEFECT-002](./qa/defects/reports/DEFECT-002.md)（body の max_length が未 enforce）** を検出し、起票 → 修正 → 回帰まで完了した。上図は検出当時の E2E 証跡（`Ensure this value has at most 4000 characters (it has 4001).` を表示して拒否）。
 
 > 現在この境界検証は **runn の API 層（API-C / `validation/title_body_boundary.yml` の4点境界）** が担う（テストピラミッド最適化で E2E から移設）。「想定で書いた自動テストが意外な FAIL を返し、それがバグ発見につながった」過程を残した事例。
-
-**Auto-04 — 非担当Agentの認可UI抑止**
-
-![Auto-04: 非担当AgentはステータスUIを操作できない](./qa/docs/images/auto-04_agent_no_status_ui.png)
-
-agent2 が非担当チケット（agent1割当）を開くと、Status Transition は「Not allowed to change status.」のみで `<select>` が描画されない。「**見えるが操作できない**」というRBACの正常な挙動を確認。
-
-API 層の新設そのものも QA の設計判断です。テスト容易性のため最小限の JSON API（DRF・Token 認証）を追加し、認可ルールは HTML ビューと [policy.py](./app/tickets/policy.py) を**共有（単一ソース）**——`INTENTIONAL_BUG_IDOR` を立てると **単体の IDOR テスト・API の IDOR テスト・E2E(Auto-02) が同時に・同一原因で失敗**します（テストが本物を見ている担保）。さらに、API の期待値（過去日 → 400）を厳密に書き下す過程で、HTML の期限変更が過去日で **500 になる実バグ（[DEFECT-003](./qa/defects/reports/DEFECT-003.md)）** を発見し、起票 → 修正 → 回帰まで完了しました（DEFECT-001/002 に続く3例目。**下層が上層の不具合を炙り出した**例）。
 
 ## スコープ外としたもの
 
@@ -114,21 +105,11 @@ API 層の新設そのものも QA の設計判断です。テスト容易性の
 
 CIで `push` / `pull_request` 時に **単体 53件＋runn 10 runbook＋E2E 4シナリオ** の3ジョブを自動実行（上部バッジ参照）。手元で動かす場合の手順は **[SETUP.md](./SETUP.md)** に集約しています。
 
-## 関連作品（QAポートフォリオ3部作）
-
-「品質保証で何を担うか」——作り込む・設計する・判断する——を段階的に広げた 3 部作の①です。
-
-- **本リポジトリ｜① 技術・基礎編** — 期待値を厳密に書き下せる決定的な業務システムを対象に、JSTQB 準拠のプロセスとテストピラミッド（手動・API・E2E）で品質を作り込む。
-- **[② 戦略・AI 編：AI学習レコメンド機能](https://github.com/nani9ashi/qa-portfolio-ai-recommender)** — 確率的に揺らぐ生成 AI プロダクトを対象に、テストを 2 層で設計し、判定 AI（測定器）自体の正しさまで人手正解との照合で検証する。
-- **[③ 評価・判断編：既存物体検出モデル](https://github.com/nani9ashi/qa-portfolio-object-detection)** — 自分で作っていない調達候補モデルを外から評価し、事前に固定した基準に対して導入可否（結論は No-Go）を判断する。
-
-3 作を貫く主題は「**物差し（期待値・判定器・受け入れ基準）そのものは正しいか**」という問いです。
-
 ## 作者
 
 **仁後慎太郎**（[GitHub](https://github.com/nani9ashi)）
 
-施設警備・個別指導塾・引越の現場で「使う側」として品質の不全を体験したことを出発点に、品質保証を主題として作品を作っています。JSTQB Foundation Level 保有。哲学のバックグラウンドから、**「受け入れ基準＝物差しそのものは正しいか」を問い直す**ことを QA の軸にしています。
+施設警備・個別指導塾・引越の現場で「使う側」として品質の不全を体験したことを出発点に、品質保証を主題として作品を作っています。JSTQB Foundation Level 保有。**「担保したい価値」を問い続ける**ことを QA の軸にしています。
 
 <!-- ポートフォリオサイト公開後: 全作品を束ねるサイトへのリンクをここに追加 -->
 
