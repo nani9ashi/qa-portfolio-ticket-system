@@ -86,12 +86,12 @@ MVPでは主に以下の操作を記録します。
 
 ## 9. テスト用の意図的欠陥（Bug Switch）
 
-QA検証（探索的テストや自動テストのフェイル実演）の題材として、`config/settings.py` に **`INTENTIONAL_BUG_IDOR`** スイッチを実装。
+QA検証（自動テストのフェイル実演）の題材として、`config/settings.py` に **`INTENTIONAL_BUG_IDOR`** スイッチを実装。
 
 - **True**：Requester が他人チケットを閲覧可能になる脆弱状態（IDOR: Insecure Direct Object Reference）を再現
 - **False（既定）**：正常な認可（Requester は自分のチケットのみ閲覧可）
 
-QA 運用での扱い（テスト時の ON/OFF 記録ルール、自動化での Fail 実演手順）は [qa/docs/40_test_environment.md §6](../qa/docs/40_test_environment.md#6-意図的欠陥検出修正の題材) と [qa/docs/60_test_completion_report.md §11.3](../qa/docs/60_test_completion_report.md#113-検出能力の実演手順idor回帰) を参照。
+QA 運用での扱い（テスト時の ON/OFF 記録ルール、自動化での Fail 実演手順）は [qa/docs/40_test_environment.md §6](../qa/docs/40_test_environment.md#6-意図的欠陥検出修正の題材) と [qa/docs/90_automated_test_report.md §4](../qa/docs/90_automated_test_report.md#4-検出能力の実演手順idor回帰) を参照。
 
 ## 10. 関連リソース
 - **QA統合成果物**: [qa/README](../qa/README.md)

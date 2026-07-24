@@ -1,6 +1,6 @@
 # SETUP — 手元での動作確認手順
 
-本リポジトリは [CI Pipeline](.github/workflows/ci.yml) で **毎 push / PR で E2E（Playwright・4シナリオ）と API（runn・10 runbook）を並列自動実行** しています（README 上部のバッジを参照）。手元で動かして確かめたい場合の手順を以下にまとめます。
+本リポジトリは [CI Pipeline](.github/workflows/ci.yml) で **毎 push / PR に 単体（pytest・53件）／API（runn・10 runbook）／E2E（Playwright・4シナリオ）の3ジョブを並列自動実行** しています（README 上部のバッジを参照）。手元で動かして確かめたい場合の手順を以下にまとめます。
 
 ## 0. 前提
 
@@ -51,13 +51,25 @@ python manage.py seed_demo
 | Agent | `agent1`, `agent2` |
 | Admin | `admin1` |
 
-## 4. アプリ起動とテスト実行（2ターミナル）
+## 3.5 単体テストの実行（最速・サーバ不要）
+
+セットアップの確認を兼ねて、まず単体テストを実行できます。サーバー起動もブラウザも不要です。
+
+```bash
+cd app
+python -m pytest
+# 53 passed（ローカル実測 約0.2〜0.3秒）
+```
+
+対象は `app/tickets/tests/`（認可述語・状態遷移の純ロジック）。設定は `app/pytest.ini`、テスト用 DB は pytest-django が自動生成・自動破棄します（開発用 `db.sqlite3` には触れません）。
+
+## 4. アプリ起動とE2Eテスト実行（2ターミナル）
 
 2 つのターミナルを開き、両方で仮想環境を有効化して以下を実行します。
 
 | 手順 | **ターミナル1（サーバー起動）** | **ターミナル2（テスト実行）** |
 |---|---|---|
-| 1. ルートへ移動 | `cd ticket-management-system` | `cd ticket-management-system` |
+| 1. ルートへ移動 | `cd qa-portfolio-ticket-system` | `cd qa-portfolio-ticket-system` |
 | 2. 仮想環境を有効化 | OS別コマンド（§1 参照） | OS別コマンド（§1 参照） |
 | 3. 実行 | `cd app`<br>`python manage.py runserver` | `cd qa/automation`<br>`python -m pytest --headed` |
 
@@ -85,7 +97,11 @@ python -m pytest tests/test_scenario_02_idor.py --headed
 接続先を変えたい場合：
 
 ```bash
+# macOS / Linux
 BASE_URL=http://localhost:9000 python -m pytest
+
+# Windows (PowerShell)
+$env:BASE_URL = "http://localhost:9000"; python -m pytest
 ```
 
 > `BASE_URL` 環境変数で切替可能。既定は `http://127.0.0.1:8000`。
@@ -114,7 +130,7 @@ cd app && python manage.py migrate && python manage.py seed_demo && python manag
 
 ### 単一ソースの確認（IDOR 失敗実演）
 
-`app/config/settings.py` の `INTENTIONAL_BUG_IDOR=True` にして再起動すると、runn の `rbac_idor/idor.yml` と E2E の Auto-02 が **同時に失敗** します（同じ `policy.can_view` を共有しているため）。確認後は必ず `False` に戻してください。
+`app/config/settings.py` の `INTENTIONAL_BUG_IDOR=True` にして再起動すると、単体の IDOR テスト・runn の `rbac_idor/idor.yml`・E2E の Auto-02 が **同一原因で同時に失敗** します（3層が同じ `policy.can_view` を共有しているため）。確認後は必ず `False` に戻してください。
 
 ## 6. アクセス先（手動確認）
 
@@ -127,4 +143,4 @@ cd app && python manage.py migrate && python manage.py seed_demo && python manag
 
 - 本セットアップは **手元での確認用** です。
 - 通常は GitHub Actions が `push` / `pull_request` 時に同等のセットアップを自動実行します（[ci.yml](.github/workflows/ci.yml) 参照）。
-- CI 結果（E2E 4シナリオ＋runn 10 runbook の Pass／スクショ・runn 出力の証跡）は Actions タブの Artifacts から取得できます。
+- CI 結果（単体 53件＋runn 10 runbook＋E2E 4シナリオの Pass／スクショ・runn 出力の証跡）は Actions タブの Artifacts から取得できます（単体の結果はジョブログで確認）。
